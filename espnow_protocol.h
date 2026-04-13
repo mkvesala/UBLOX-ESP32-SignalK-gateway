@@ -14,6 +14,7 @@ namespace ESPNow {
         HEADING_DELTA   = 1,
         BATTERY_DELTA   = 2,
         WEATHER_DELTA   = 3,
+        GNSS_DELTA      = 4,
         LEVEL_COMMAND   = 10,
         LEVEL_RESPONSE  = 11,
     };
@@ -58,6 +59,21 @@ namespace ESPNow {
         float humidity_p;      // percent
         float pressure_hpa;    // hPa
     };
+
+    // GNSS position, speed, course
+    // Sent by UBLOX-ESP32-SignalK-gateway
+    struct GnssDelta {
+        float lat_deg;        // Latitude, decimal degrees
+        float lon_deg;        // Longitude, decimal degrees
+        float sog_ms;         // Speed over ground, m/s
+        float cog_true_rad;   // Course over ground (true), radians
+        float cog_mag_rad;    // COG (magnetic), radians — NAN if eranto unknown
+        float mag_var_rad;    // Magnetic variation (eranto), radians — NAN if unknown
+        uint8_t satellites;   // SIV
+        uint8_t fix_type;     // 0=no fix, 3=3D, 4=GNSS+DR
+        uint8_t fix_ok;       // getGnssFixOk() ? 1 : 0
+        uint8_t reserved;     // padding
+    };  // 28 bytes
 
     // Level command (CrowPanel → Compass, broadcast)
     // Sent to CMPS14-ESP32-SignalK-gateway
