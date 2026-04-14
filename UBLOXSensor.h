@@ -10,7 +10,9 @@
 // - No data processing, no business logic
 // - begin(Wire) initialises connection and configures the module
 // - read() fetches the latest PVT data (non-blocking via getPVT(0))
-// - Owned by: UBLOXProcessor
+// - Owned by: UBLOXApplication
+// - Uses: TwoWire
+
 
 struct RawGnssData {
     int32_t  lat_e7;       // degrees × 10^-7
@@ -25,8 +27,10 @@ struct RawGnssData {
 };
 
 class UBLOXSensor {
+
 public:
-    UBLOXSensor();
+
+    explicit UBLOXSensor();
 
     bool begin(TwoWire &wirePort);
     bool available() const;
@@ -35,12 +39,14 @@ public:
     bool read(RawGnssData &out);
 
     // Direct accessors used by UBLOXProcessor::begin() for magvar probe
-    int16_t  getMagDec();
+    int16_t getMagDec();
     uint16_t getMagAcc();
 
 private:
+
     static constexpr uint8_t GNSS_ADDR = 0x42;
 
     SFE_UBLOX_GNSS _gnss;
-    TwoWire*       _wire = nullptr;
+    TwoWire* _wire = nullptr;
+
 };

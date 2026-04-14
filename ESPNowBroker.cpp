@@ -59,7 +59,7 @@ void ESPNowBroker::sendDelta() {
     pkt.payload.sog_ms       = validf(d.sog_ms)      ? d.sog_ms      : NAN;
     pkt.payload.cog_true_rad = validf(d.cog_t_rad)   ? d.cog_t_rad   : NAN;
     pkt.payload.cog_mag_rad  = validf(d.cog_m_rad)   ? d.cog_m_rad   : NAN;
-    pkt.payload.mag_var_rad  = validf(d.mag_var_rad)  ? d.mag_var_rad : NAN;
+    pkt.payload.mag_var_rad  = validf(d.mag_var_rad) ? d.mag_var_rad : NAN;
     pkt.payload.satellites   = d.satellites;
     pkt.payload.fix_type     = d.fix_type;
     pkt.payload.fix_ok       = d.fix_ok ? 1 : 0;

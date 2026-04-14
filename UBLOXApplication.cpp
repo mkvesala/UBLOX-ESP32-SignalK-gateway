@@ -182,7 +182,7 @@ void UBLOXApplication::handleDiag(unsigned long now) {
     _last_diag_ms = now;
 
     uint32_t heap = ESP.getFreeHeap();
-    uint32_t wm   = uxTaskGetStackHighWaterMark(nullptr) * sizeof(StackType_t);
+    uint32_t wm = uxTaskGetStackHighWaterMark(nullptr) * sizeof(StackType_t);
     Serial.printf("[DIAG] heap=%lu B  stack_wm=%lu B\n",
                   (unsigned long)heap, (unsigned long)wm);
     _display.showDiagData(heap, wm);

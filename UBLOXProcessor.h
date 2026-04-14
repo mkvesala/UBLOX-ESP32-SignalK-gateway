@@ -13,6 +13,7 @@
 // - setLiveMagVar() receives magnetic variation from SignalK subscription
 // - getDelta() returns processed data for brokers
 // - Owned by: UBLOXApplication
+// - Uses: UBLOXSensor, TwoWire, GnssDelta (struct)
 
 enum class MagVarSource : uint8_t {
     UNKNOWN  = 0,   // not yet determined
@@ -21,7 +22,9 @@ enum class MagVarSource : uint8_t {
 };
 
 class UBLOXProcessor {
+
 public:
+
     explicit UBLOXProcessor(UBLOXSensor &sensorRef);
 
     bool begin(TwoWire &wirePort);
@@ -29,12 +32,12 @@ public:
 
     // Delta for SignalK and ESP-NOW brokers
     struct GnssDelta {
-        float lat_deg     = NAN;
-        float lon_deg     = NAN;
-        float sog_ms      = NAN;
-        float cog_t_rad   = NAN;   // COG true (direct from u-blox)
-        float cog_m_rad   = NAN;   // COG magnetic (computed, NAN if variation unknown)
-        float mag_var_rad = NAN;   // magnetic variation, NAN if unknown
+        float lat_deg      = NAN;
+        float lon_deg      = NAN;
+        float sog_ms       = NAN;
+        float cog_t_rad    = NAN;   // COG true (direct from u-blox)
+        float cog_m_rad    = NAN;   // COG magnetic (computed, NAN if variation unknown)
+        float mag_var_rad  = NAN;   // magnetic variation, NAN if unknown
         uint8_t satellites = 0;
         uint8_t fix_type   = 0;
         bool    fix_ok     = false;
@@ -54,18 +57,19 @@ public:
     bool     getFixOk()      const { return _delta.fix_ok; }
 
     // Magnetic variation source
-    MagVarSource getMagVarSource()         const { return _magvar_source; }
-    bool         needsMagVarSubscription() const { return _magvar_source == MagVarSource::SIGNALK; }
+    MagVarSource getMagVarSource() const { return _magvar_source; }
+    bool needsMagVarSubscription() const { return _magvar_source == MagVarSource::SIGNALK; }
 
     // Called by SignalKBroker when magneticVariation arrives from server
     void setLiveMagVar(float rad);
 
 private:
+
     UBLOXSensor &_sensor;
 
-    GnssDelta    _delta;
+    GnssDelta _delta;
     MagVarSource _magvar_source = MagVarSource::UNKNOWN;
-    float        _magvar_rad    = NAN;  // current best magnetic variation value
+    float _magvar_rad = NAN;  // current best magnetic variation value
 
     // getMagDec() scale factor — verified at runtime and printed to Serial
     // UBX-NAV-PVT spec: I2, scale 1e-2 (degrees × 10^-2)
@@ -78,4 +82,5 @@ private:
     void probeSensorMagVar();
 
     void updateDelta(const RawGnssData &raw);
+
 };

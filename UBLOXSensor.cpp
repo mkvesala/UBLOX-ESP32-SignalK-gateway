@@ -54,5 +54,5 @@ bool UBLOXSensor::read(RawGnssData &out) {
 }
 
 // Used by UBLOXProcessor::begin() to probe sensor magvar capability
-int16_t UBLOXSensor::getMagDec()  { return _gnss.getMagDec(); }
+int16_t UBLOXSensor::getMagDec() { return _gnss.getMagDec(); }
 uint16_t UBLOXSensor::getMagAcc() { return _gnss.getMagAcc(); }

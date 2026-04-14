@@ -12,25 +12,29 @@
 // - HTTP configuration interface — skeleton
 // - Authentication and full UI to be added later (see CMPS14 reference)
 // - Owned by: UBLOXApplication
+// - Uses: UBLOXProcessor, UBLOXPreferences, SignalKBroker, DisplayManager
+// - Owns: WebServer
+
 
 class WebUIManager {
+
 public:
+
     explicit WebUIManager(
-        UBLOXProcessor  &processorRef,
+        UBLOXProcessor &processorRef,
         UBLOXPreferences &prefsRef,
-        SignalKBroker   &signalkRef,
-        DisplayManager  &displayRef
+        SignalKBroker &signalkRef,
+        DisplayManager &displayRef
     );
 
     void begin();
     void handleRequest();
 
 private:
-    WebServer        _server {80};
-    UBLOXProcessor   &_processor;
+    WebServer _server {80};
+    UBLOXProcessor &_processor;
     UBLOXPreferences &_prefs;
-    SignalKBroker    &_signalk;
-    DisplayManager   &_display;
+    SignalKBroker &_signalk;
+    DisplayManager &_display;
 
-    void setupRoutes();
 };

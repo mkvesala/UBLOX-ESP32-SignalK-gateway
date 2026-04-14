@@ -79,23 +79,23 @@ void SignalKBroker::sendDelta() {
     _delta_doc.clear();
     _delta_doc["context"] = "vessels.self";
     auto updates = _delta_doc.createNestedArray("updates");
-    auto up      = updates.createNestedObject();
+    auto up = updates.createNestedObject();
     up["$source"] = _sk_source;
-    auto values  = up.createNestedArray("values");
+    auto values = up.createNestedArray("values");
 
     // Helper for simple float paths
     auto add = [&](const char* path, float v) {
-        auto o    = values.createNestedObject();
+        auto o = values.createNestedObject();
         o["path"] = path;
         o["value"] = v;
     };
 
     // navigation.position — nested object
     if (ch_pos) {
-        auto o    = values.createNestedObject();
+        auto o = values.createNestedObject();
         o["path"] = "navigation.position";
-        auto pos  = o.createNestedObject("value");
-        pos["latitude"]  = d.lat_deg;
+        auto pos = o.createNestedObject("value");
+        pos["latitude"] = d.lat_deg;
         pos["longitude"] = d.lon_deg;
         last_lat = d.lat_deg;
         last_lon = d.lon_deg;
@@ -141,8 +141,8 @@ void SignalKBroker::subscribeToMagneticVariation() {
     _subscribe_doc.clear();
     _subscribe_doc["context"] = "vessels.self";
     auto subscribe = _subscribe_doc.createNestedArray("subscribe");
-    auto s         = subscribe.createNestedObject();
-    s["path"]   = "navigation.magneticVariation";
+    auto s = subscribe.createNestedObject();
+    s["path"] = "navigation.magneticVariation";
     s["format"] = "delta";
     s["policy"] = "ideal";
     s["period"] = 1000;

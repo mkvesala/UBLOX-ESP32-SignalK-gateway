@@ -14,9 +14,13 @@
 // - No fix: status message
 // - FIFO queue for info/debug messages (shown 2 s, then back to GPS data)
 // - Owned by: UBLOXApplication
+// - Owns: LiquidCrystal_I2C
+// - Uses: UBLOXProcessor, SignalKBroker
 
 class DisplayManager {
+
 public:
+
     explicit DisplayManager(UBLOXProcessor &processorRef, SignalKBroker &signalkRef);
 
     void begin();
@@ -31,6 +35,7 @@ public:
     bool isPresent() const { return _lcd_present; }
 
 private:
+
     static constexpr uint8_t ADDR_PRI  = 0x27;
     static constexpr uint8_t ADDR_ALT  = 0x3F;
     static constexpr uint8_t LCD_COLS  = 16;
@@ -39,7 +44,7 @@ private:
     static constexpr unsigned long MSG_SHOW_MS = 2000;
 
     UBLOXProcessor &_processor;
-    SignalKBroker  &_signalk;
+    SignalKBroker &_signalk;
 
     LiquidCrystal_I2C _lcd_27 {ADDR_PRI, LCD_COLS, LCD_ROWS};
     LiquidCrystal_I2C _lcd_3f {ADDR_ALT, LCD_COLS, LCD_ROWS};
@@ -52,11 +57,12 @@ private:
         char l2[17];
         bool used = false;
     };
+
     Msg _queue[MSG_QUEUE];
     uint8_t _q_head = 0;
     uint8_t _q_tail = 0;
 
-    bool         _showing_msg = false;
+    bool _showing_msg = false;
     unsigned long _msg_start_ms = 0;
 
     char _prev_top[17] {};
@@ -65,8 +71,9 @@ private:
     void showGpsData();
     void printLines(const char* l1, const char* l2);
 
-    static bool  i2cPresent(uint8_t addr);
-    static void  copy16(char* dst, const char* src);
+    static bool i2cPresent(uint8_t addr);
+    static void copy16(char* dst, const char* src);
     static float sogToKnots(float ms) { return ms * 1.94384f; }
-    static int   cogToDeg(float rad)  { return (int)(rad * RAD_TO_DEG + 0.5f); }
+    static int cogToDeg(float rad) { return (int)(rad * RAD_TO_DEG + 0.5f); }
+    
 };

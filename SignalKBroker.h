@@ -13,6 +13,8 @@
 // - Sends navigation delta (position, SOG, COG, magnetic variation)
 // - Subscribes to navigation.magneticVariation when sensor variation unavailable
 // - Owned by: UBLOXApplication
+// - Owns: WebsocketsClient
+// - Uses: UBLOXProcessor
 
 namespace websockets {
     class WebsocketsClient;
@@ -21,7 +23,9 @@ namespace websockets {
 }
 
 class SignalKBroker {
+
 public:
+
     explicit SignalKBroker(UBLOXProcessor &processorRef);
 
     bool begin();
@@ -30,23 +34,23 @@ public:
     void closeWebsocket();
     void sendDelta();
 
-    bool        isOpen()           const { return _ws_open; }
+    bool isOpen() const { return _ws_open; }
     const char* getSignalKSource() const { return _sk_source; }
 
 private:
 
-    UBLOXProcessor             &_processor;
+    UBLOXProcessor &_processor;
     websockets::WebsocketsClient _ws;
 
     // Reusable JSON documents (stack allocated)
     // position obj + 4 float paths — 640 bytes is sufficient
-    StaticJsonDocument<640>  _delta_doc;
+    StaticJsonDocument<640> _delta_doc;
     StaticJsonDocument<1024> _incoming_doc;
-    StaticJsonDocument<256>  _subscribe_doc;
+    StaticJsonDocument<256> _subscribe_doc;
 
     bool _ws_open = false;
-    char _sk_url[512]    {};
-    char _sk_source[32]  {};
+    char _sk_url[512] {};
+    char _sk_source[32] {};
 
     // Deadband thresholds
     static constexpr float DB_POS_DEG = 0.0001f;   // ~11 m
@@ -60,4 +64,5 @@ private:
 
     void onMessageCallback(websockets::WebsocketsMessage msg);
     void onEventCallback(websockets::WebsocketsEvent event);
+    
 };

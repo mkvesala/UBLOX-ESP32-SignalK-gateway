@@ -22,7 +22,9 @@
 // - Owned by: main .ino (global instance)
 
 class UBLOXApplication {
+
 public:
+
     explicit UBLOXApplication();
 
     void begin();
@@ -30,41 +32,42 @@ public:
     bool sensorOk() const { return _sensor_ok; }
 
 private:
+
     // Hardware
     static constexpr uint8_t I2C_SDA = 21;
     static constexpr uint8_t I2C_SCL = 22;
 
     // Timing constants
-    static constexpr unsigned long READ_MS              = 167;    // ~6 Hz
-    static constexpr unsigned long MIN_TX_INTERVAL_MS   = 200;    // ~5 Hz SignalK
-    static constexpr unsigned long ESPNOW_TX_INTERVAL_MS = 200;   // ~5 Hz ESP-NOW
+    static constexpr unsigned long READ_MS               = 167;    // ~6 Hz
+    static constexpr unsigned long MIN_TX_INTERVAL_MS    = 199;    // ~5 Hz SignalK
+    static constexpr unsigned long ESPNOW_TX_INTERVAL_MS = 211;    // ~5 Hz ESP-NOW
     static constexpr unsigned long WIFI_STATUS_CHECK_MS  = 503;
     static constexpr unsigned long WIFI_TIMEOUT_MS       = 90001;
     static constexpr unsigned long WS_RETRY_MS           = 1999;
     static constexpr unsigned long WS_RETRY_MAX_MS       = 119993;
-    static constexpr unsigned long DIAG_INTERVAL_MS      = 30013; // ~30 s
+    static constexpr unsigned long DIAG_INTERVAL_MS      = 30013;  // ~30 s
 
     // Timers
-    unsigned long _expn_retry_ms     = WS_RETRY_MS;
-    unsigned long _next_ws_try_ms    = 0;
-    unsigned long _last_tx_ms        = 0;
-    unsigned long _last_read_ms      = 0;
+    unsigned long _expn_retry_ms      = WS_RETRY_MS;
+    unsigned long _next_ws_try_ms     = 0;
+    unsigned long _last_tx_ms         = 0;
+    unsigned long _last_read_ms       = 0;
     unsigned long _wifi_conn_start_ms = 0;
     unsigned long _wifi_last_check_ms = 0;
     unsigned long _last_espnow_tx_ms  = 0;
     unsigned long _last_diag_ms       = 0;
 
-    bool      _sensor_ok  = false;
+    bool _sensor_ok = false;
     WifiState _wifi_state = WifiState::INIT;
 
     // Subsystems — stack allocated, lifetime of the application
-    UBLOXSensor      _sensor;
-    UBLOXProcessor   _processor;
+    UBLOXSensor _sensor;
+    UBLOXProcessor _processor;
     UBLOXPreferences _prefs;
-    SignalKBroker    _signalk;
-    ESPNowBroker     _espnow;
-    DisplayManager   _display;
-    WebUIManager     _webui;
+    SignalKBroker _signalk;
+    ESPNowBroker _espnow;
+    DisplayManager _display;
+    WebUIManager _webui;
 
     // Loop handlers
     void handleWifi(unsigned long now);
@@ -78,4 +81,5 @@ private:
     void handleDiag(unsigned long now);
 
     void initWifiServices();
+    
 };

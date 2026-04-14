@@ -11,7 +11,7 @@ bool UBLOXProcessor::begin(TwoWire &wirePort) {
     if (!_sensor.begin(wirePort)) return false;
 
     // Give the module a moment to produce its first fix
-    delay(500);
+    delay(503);
 
     // Probe for sensor-native magnetic variation
     this->probeSensorMagVar();
@@ -46,15 +46,15 @@ void UBLOXProcessor::probeSensorMagVar() {
 
     for (int i = 0; i < 5; i++) {
         delay(200);
-        int16_t  dec = _sensor.getMagDec();
+        int16_t dec = _sensor.getMagDec();
         uint16_t acc = _sensor.getMagAcc();
 
         Serial.printf("[GNSS] probe %d: mag_dec=%d mag_acc=%u\n", i, dec, acc);
 
         if (dec != 0 && acc < 500) {
             float magvar_deg = (float)dec / MAG_DEC_SCALE;
-            _magvar_rad      = magvar_deg * DEG_TO_RAD;
-            _magvar_source   = MagVarSource::SENSOR;
+            _magvar_rad = magvar_deg * DEG_TO_RAD;
+            _magvar_source = MagVarSource::SENSOR;
             Serial.printf("[GNSS] Sensor magvar OK: %.2f° (%.4f rad)\n",
                           magvar_deg, _magvar_rad);
             return;
@@ -69,8 +69,8 @@ void UBLOXProcessor::probeSensorMagVar() {
 // Convert raw UBX-NAV-PVT fields to SI units and populate _delta
 void UBLOXProcessor::updateDelta(const RawGnssData &raw) {
     _delta.satellites = raw.siv;
-    _delta.fix_type   = raw.fix_type;
-    _delta.fix_ok     = raw.fix_ok;
+    _delta.fix_type = raw.fix_type;
+    _delta.fix_ok = raw.fix_ok;
 
     if (!raw.fix_ok || raw.fix_type < 2) {
         // No usable fix — keep satellite and fix info but invalidate nav data
