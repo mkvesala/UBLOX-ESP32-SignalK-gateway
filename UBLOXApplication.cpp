@@ -34,8 +34,11 @@ void UBLOXApplication::begin() {
     // 5. Bluetooth not needed
     btStop();
 
-    // 6. WiFi AP_STA required for ESP-NOW + WiFi coexistence
+    // 6. WiFi AP_STA required for ESP-NOW + WiFi coexistence.
+    //    softAP() secures the AP interface immediately: hidden SSID, WPA2 password,
+    //    max 1 connection. This does not affect ESP-NOW (operates below association layer).
     WiFi.mode(WIFI_AP_STA);
+    WiFi.softAP(AP_SSID, AP_PASS, 1 /*channel*/, 1 /*ssid_hidden*/, 1 /*max_connection*/);
     WiFi.setSleep(false);
     WiFi.begin(WIFI_SSID, WIFI_PASS);
     _wifi_state = WifiState::CONNECTING;
