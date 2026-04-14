@@ -153,9 +153,9 @@ void SignalKBroker::subscribeToMagneticVariation() {
     Serial.println("[SK] Subscribed to navigation.magneticVariation");
 }
 
-// Handle incoming SignalK delta — extract eranto when subscribed
+// Handle incoming SignalK delta — extract magnetic variation when subscribed
 void SignalKBroker::onMessageCallback(WebsocketsMessage msg) {
-    if (!_processor.needsErantoSubscription()) return;
+    if (!_processor.needsMagVarSubscription()) return;
     if (!msg.isText()) return;
     _incoming_doc.clear();
     if (deserializeJson(_incoming_doc, msg.data())) return;
@@ -171,7 +171,7 @@ void SignalKBroker::onMessageCallback(WebsocketsMessage msg) {
                 if (v["value"].is<float>() || v["value"].is<double>()) {
                     float mv = v["value"].as<float>();
                     if (validf(mv)) {
-                        _processor.setLiveEranto(mv);
+                        _processor.setLiveMagVar(mv);
                     }
                 }
             }
@@ -184,8 +184,8 @@ void SignalKBroker::onEventCallback(WebsocketsEvent event) {
     switch (event) {
         case WebsocketsEvent::ConnectionOpened:
             _ws_open = true;
-            // Subscribe to eranto from server if sensor cannot provide it
-            if (_processor.needsErantoSubscription())
+            // Subscribe to magnetic variation from server if sensor cannot provide it
+            if (_processor.needsMagVarSubscription())
                 this->subscribeToMagneticVariation();
             break;
         case WebsocketsEvent::ConnectionClosed:

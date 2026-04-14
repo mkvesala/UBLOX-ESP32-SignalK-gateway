@@ -25,7 +25,7 @@ void UBLOXApplication::begin() {
     // 2. Display first — shows init messages
     _display.begin();
 
-    // 3. Sensor and processor (also probes for sensor-native eranto)
+    // 3. Sensor and processor (also probes for sensor-native magnetic variation)
     _sensor_ok = _processor.begin(Wire);
 
     // 4. Load NVS settings

@@ -10,8 +10,8 @@
 // === S I G N A L K B R O K E R ===
 //
 // - WebSocket connection to SignalK server
-// - Sends navigation delta (position, SOG, COG, eranto)
-// - Subscribes to navigation.magneticVariation when sensor eranto unavailable
+// - Sends navigation delta (position, SOG, COG, magnetic variation)
+// - Subscribes to navigation.magneticVariation when sensor variation unavailable
 // - Owned by: UBLOXApplication
 
 namespace websockets {

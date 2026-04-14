@@ -67,8 +67,8 @@ namespace ESPNow {
         float lon_deg;        // Longitude, decimal degrees
         float sog_ms;         // Speed over ground, m/s
         float cog_true_rad;   // Course over ground (true), radians
-        float cog_mag_rad;    // COG (magnetic), radians — NAN if eranto unknown
-        float mag_var_rad;    // Magnetic variation (eranto), radians — NAN if unknown
+        float cog_mag_rad;    // COG (magnetic), radians — NAN if variation unknown
+        float mag_var_rad;    // Magnetic variation, radians — NAN if unknown
         uint8_t satellites;   // SIV
         uint8_t fix_type;     // 0=no fix, 3=3D, 4=GNSS+DR
         uint8_t fix_ok;       // getGnssFixOk() ? 1 : 0

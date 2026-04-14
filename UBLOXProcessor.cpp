@@ -6,15 +6,15 @@ UBLOXProcessor::UBLOXProcessor(UBLOXSensor &sensorRef)
     : _sensor(sensorRef)
 {}
 
-// Initialise sensor and determine eranto source
+// Initialise sensor and determine magnetic variation source
 bool UBLOXProcessor::begin(TwoWire &wirePort) {
     if (!_sensor.begin(wirePort)) return false;
 
     // Give the module a moment to produce its first fix
     delay(500);
 
-    // Probe for sensor-native magnetic eranto
-    this->probeSensorEranto();
+    // Probe for sensor-native magnetic variation
+    this->probeSensorMagVar();
 
     return true;
 }
@@ -28,10 +28,10 @@ bool UBLOXProcessor::update() {
     return true;
 }
 
-// Receive eranto (magnetic variation) from SignalK server subscription
-void UBLOXProcessor::setLiveEranto(float rad) {
+// Receive magnetic variation from SignalK server subscription
+void UBLOXProcessor::setLiveMagVar(float rad) {
     if (!validf(rad)) return;
-    _eranto_rad = rad;
+    _magvar_rad = rad;
     // If we previously had no source, mark it now
     if (_magvar_source == MagVarSource::UNKNOWN)
         _magvar_source = MagVarSource::SIGNALK;
@@ -39,10 +39,10 @@ void UBLOXProcessor::setLiveEranto(float rad) {
 
 // === P R I V A T E ===
 
-// Probe up to 5 PVT frames to check if the module provides valid eranto.
+// Probe up to 5 PVT frames to check if the module provides valid magnetic variation.
 // UBX-NAV-PVT magDec: I2, scale 1e-2 degrees.  mag_acc < 500 ≈ < 5.0°.
-void UBLOXProcessor::probeSensorEranto() {
-    Serial.println("[GNSS] Probing sensor for native magnetic eranto...");
+void UBLOXProcessor::probeSensorMagVar() {
+    Serial.println("[GNSS] Probing sensor for native magnetic variation...");
 
     for (int i = 0; i < 5; i++) {
         delay(200);
@@ -52,18 +52,18 @@ void UBLOXProcessor::probeSensorEranto() {
         Serial.printf("[GNSS] probe %d: mag_dec=%d mag_acc=%u\n", i, dec, acc);
 
         if (dec != 0 && acc < 500) {
-            float eranto_deg = (float)dec / MAG_DEC_SCALE;
-            _eranto_rad      = eranto_deg * DEG_TO_RAD;
+            float magvar_deg = (float)dec / MAG_DEC_SCALE;
+            _magvar_rad      = magvar_deg * DEG_TO_RAD;
             _magvar_source   = MagVarSource::SENSOR;
-            Serial.printf("[GNSS] Sensor eranto OK: %.2f° (%.4f rad)\n",
-                          eranto_deg, _eranto_rad);
+            Serial.printf("[GNSS] Sensor magvar OK: %.2f° (%.4f rad)\n",
+                          magvar_deg, _magvar_rad);
             return;
         }
     }
 
-    // Sensor does not provide eranto — will subscribe from SignalK
+    // Sensor does not provide magnetic variation — will subscribe from SignalK
     _magvar_source = MagVarSource::SIGNALK;
-    Serial.println("[GNSS] Sensor eranto not available — will subscribe from SignalK");
+    Serial.println("[GNSS] Sensor magvar not available — will subscribe from SignalK");
 }
 
 // Convert raw UBX-NAV-PVT fields to SI units and populate _delta
@@ -98,16 +98,16 @@ void UBLOXProcessor::updateDelta(const RawGnssData &raw) {
         _delta.cog_t_rad = NAN;
     }
 
-    // Refresh eranto from sensor if that is the source
+    // Refresh magvar from sensor if that is the source
     if (_magvar_source == MagVarSource::SENSOR && raw.mag_acc < 500 && raw.mag_dec != 0) {
-        _eranto_rad = ((float)raw.mag_dec / MAG_DEC_SCALE) * DEG_TO_RAD;
+        _magvar_rad = ((float)raw.mag_dec / MAG_DEC_SCALE) * DEG_TO_RAD;
     }
 
-    _delta.mag_var_rad = _eranto_rad;
+    _delta.mag_var_rad = _magvar_rad;
 
-    // COG(M) = COG(T) − eranto  (wrap to [0, 2π))
-    if (validf(_delta.cog_t_rad) && validf(_eranto_rad)) {
-        _delta.cog_m_rad = normaliseRad(_delta.cog_t_rad - _eranto_rad);
+    // COG(M) = COG(T) − variation  (wrap to [0, 2π))
+    if (validf(_delta.cog_t_rad) && validf(_magvar_rad)) {
+        _delta.cog_m_rad = normaliseRad(_delta.cog_t_rad - _magvar_rad);
     } else {
         _delta.cog_m_rad = NAN;
     }

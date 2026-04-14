@@ -8,7 +8,7 @@
 //
 // - NVS-backed configuration storage
 // - Skeleton: load() and web password helpers implemented
-// - Future: manual eranto override, etc.
+// - Future: manual variation override, etc.
 // - Owned by: UBLOXApplication
 
 class UBLOXPreferences {
