@@ -214,13 +214,10 @@ void UBLOXApplication::handleDiag(unsigned long now) {
                   (unsigned long)heap, (unsigned long)wm);
 
     float mv = _processor.getMagVarRad();
-    const char* src = _processor.getMagVarSource() == MagVarSource::SENSOR  ? "sensor"
-                    : _processor.getMagVarSource() == MagVarSource::SIGNALK ? "signalk"
-                    : "unknown";
     if (validf(mv))
-        Serial.printf("[DIAG] magvar=%.2f° src=%s\n", mv * RAD_TO_DEG, src);
+        Serial.printf("[DIAG] magvar=%.2f° src=wmm\n", mv * RAD_TO_DEG);
     else
-        Serial.printf("[DIAG] magvar=N/A src=%s\n", src);
+        Serial.printf("[DIAG] magvar=N/A src=wmm\n");
 
     _display.showDiagData(heap, wm);
 }

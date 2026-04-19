@@ -10,15 +10,13 @@
 // === S I G N A L K B R O K E R ===
 //
 // - WebSocket connection to SignalK server
-// - Sends navigation delta (position, SOG, COG, magnetic variation)
-// - Subscribes to navigation.magneticVariation when sensor variation unavailable
+// - Sends: navigation.position, speedOverGround, courseOverGroundTrue, magneticVariation
 // - Owned by: UBLOXApplication
 // - Owns: WebsocketsClient
 // - Uses: UBLOXProcessor
 
 namespace websockets {
     class WebsocketsClient;
-    class WebsocketsMessage;
     enum class WebsocketsEvent;
 }
 
@@ -42,11 +40,8 @@ private:
     UBLOXProcessor &_processor;
     websockets::WebsocketsClient _ws;
 
-    // Reusable JSON documents (stack allocated)
-    // position obj + 4 float paths — 640 bytes is sufficient
-    StaticJsonDocument<640> _delta_doc;
-    StaticJsonDocument<1024> _incoming_doc;
-    StaticJsonDocument<256> _subscribe_doc;
+    // Reusable JSON document — position obj + 3 float paths
+    StaticJsonDocument<512> _delta_doc;
 
     bool _ws_open = false;
     char _sk_url[512] {};
@@ -63,9 +58,6 @@ private:
 
     void setSignalKURL();
     void setSignalKSource();
-    void subscribeToMagneticVariation();
-
-    void onMessageCallback(websockets::WebsocketsMessage msg);
     void onEventCallback(websockets::WebsocketsEvent event);
     
 };

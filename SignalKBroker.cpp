@@ -26,9 +26,6 @@ void SignalKBroker::handleStatus() {
 bool SignalKBroker::connectWebsocket() {
     _ws_open = _ws.connect(_sk_url);
     if (_ws_open) {
-        _ws.onMessage([this](WebsocketsMessage msg) {
-            this->onMessageCallback(msg);
-        });
         _ws.onEvent([this](WebsocketsEvent event, const String &data) {
             this->onEventCallback(event);
         });
@@ -52,7 +49,7 @@ void SignalKBroker::sendDelta() {
     // --- Deadband tracking ---
     static float last_lat = NAN, last_lon = NAN;
     static float last_sog = NAN;
-    static float last_cog_t = NAN, last_cog_m = NAN;
+    static float last_cog_t = NAN;
     static float last_var = NAN;
 
     uint32_t now = millis();
@@ -70,14 +67,10 @@ void SignalKBroker::sendDelta() {
                     (!validf(last_cog_t) ||
                      fabsf(computeAngDiffRad(d.cog_t_rad, last_cog_t)) >= DB_COG_RAD);
 
-    bool ch_cog_m = validf(d.cog_m_rad) &&
-                    (!validf(last_cog_m) ||
-                     fabsf(computeAngDiffRad(d.cog_m_rad, last_cog_m)) >= DB_COG_RAD);
-
     bool ch_var = validf(d.mag_var_rad) &&
                   (!validf(last_var) || fabsf(d.mag_var_rad - last_var) >= DB_VAR_RAD);
 
-    if (!(ch_pos || ch_sog || ch_cog_t || ch_cog_m || ch_var)) return;
+    if (!(ch_pos || ch_sog || ch_cog_t || ch_var)) return;
 
     // --- Build JSON delta ---
     _delta_doc.clear();
@@ -106,14 +99,13 @@ void SignalKBroker::sendDelta() {
         _last_pos_tx_ms = now;
     }
 
-    if (ch_sog)   { add("navigation.speedOverGround",          d.sog_ms);      last_sog   = d.sog_ms; }
-    if (ch_cog_t) { add("navigation.courseOverGroundTrue",     d.cog_t_rad);   last_cog_t = d.cog_t_rad; }
-    if (ch_cog_m) { add("navigation.courseOverGroundMagnetic", d.cog_m_rad);   last_cog_m = d.cog_m_rad; }
-    if (ch_var)   { add("navigation.magneticVariation",        d.mag_var_rad); last_var   = d.mag_var_rad; }
+    if (ch_sog)   { add("navigation.speedOverGround",      d.sog_ms);      last_sog   = d.sog_ms; }
+    if (ch_cog_t) { add("navigation.courseOverGroundTrue", d.cog_t_rad);   last_cog_t = d.cog_t_rad; }
+    if (ch_var)   { add("navigation.magneticVariation",    d.mag_var_rad); last_var   = d.mag_var_rad; }
 
     if (values.size() == 0) return;
 
-    char buf[640];
+    char buf[512];
     size_t n = serializeJson(_delta_doc, buf, sizeof(buf));
     bool ok = _ws.send(buf, n);
     if (!ok) {
@@ -141,57 +133,11 @@ void SignalKBroker::setSignalKSource() {
     snprintf(_sk_source, sizeof(_sk_source), "esp32.ublox-%02x%02x%02x", m[3], m[4], m[5]);
 }
 
-// Subscribe to navigation.magneticVariation at ~1 Hz (CMPS14-pattern)
-void SignalKBroker::subscribeToMagneticVariation() {
-    _subscribe_doc.clear();
-    _subscribe_doc["context"] = "vessels.self";
-    auto subscribe = _subscribe_doc.createNestedArray("subscribe");
-    auto s = subscribe.createNestedObject();
-    s["path"] = "navigation.magneticVariation";
-    s["format"] = "delta";
-    s["policy"] = "ideal";
-    s["period"] = 1000;
-
-    char buf[256];
-    size_t n = serializeJson(_subscribe_doc, buf, sizeof(buf));
-    _ws.send(buf, n);
-    Serial.println("[SK] Subscribed to navigation.magneticVariation");
-}
-
-// Handle incoming SignalK delta — extract magnetic variation when subscribed
-void SignalKBroker::onMessageCallback(WebsocketsMessage msg) {
-    if (!_processor.needsMagVarSubscription()) return;
-    if (!msg.isText()) return;
-    _incoming_doc.clear();
-    if (deserializeJson(_incoming_doc, msg.data())) return;
-    if (!_incoming_doc.containsKey("updates")) return;
-
-    for (JsonObject up : _incoming_doc["updates"].as<JsonArray>()) {
-        if (!up.containsKey("values")) continue;
-        for (JsonObject v : up["values"].as<JsonArray>()) {
-            if (!v.containsKey("path")) continue;
-            const char* path = v["path"];
-            if (!path) continue;
-            if (strcmp(path, "navigation.magneticVariation") == 0) {
-                if (v["value"].is<float>() || v["value"].is<double>()) {
-                    float mv = v["value"].as<float>();
-                    if (validf(mv)) {
-                        _processor.setLiveMagVar(mv);
-                    }
-                }
-            }
-        }
-    }
-}
-
 // Handle websocket events
 void SignalKBroker::onEventCallback(WebsocketsEvent event) {
     switch (event) {
         case WebsocketsEvent::ConnectionOpened:
             _ws_open = true;
-            // Subscribe to magnetic variation from server if sensor cannot provide it
-            if (_processor.needsMagVarSubscription())
-                this->subscribeToMagneticVariation();
             break;
         case WebsocketsEvent::ConnectionClosed:
             _ws_open = false;

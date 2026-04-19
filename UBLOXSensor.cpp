@@ -44,8 +44,9 @@ bool UBLOXSensor::read(RawGnssData &out) {
     out.lon_e7      = _gnss.getLongitude();
     out.speed_mms   = _gnss.getGroundSpeed();
     out.heading_e5  = _gnss.getHeading();
-    out.mag_dec     = _gnss.getMagDec();
-    out.mag_acc     = _gnss.getMagAcc();
+    out.year        = _gnss.getYear();
+    out.month       = _gnss.getMonth();
+    out.day         = _gnss.getDay();
     out.siv         = _gnss.getSIV();
     out.fix_type    = _gnss.getFixType();
     out.fix_ok      = _gnss.getGnssFixOk();
@@ -53,6 +54,3 @@ bool UBLOXSensor::read(RawGnssData &out) {
     return true;
 }
 
-// Used by UBLOXProcessor::begin() to probe sensor magvar capability
-int16_t UBLOXSensor::getMagDec() { return _gnss.getMagDec(); }
-uint16_t UBLOXSensor::getMagAcc() { return _gnss.getMagAcc(); }

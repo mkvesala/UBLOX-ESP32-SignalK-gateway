@@ -19,8 +19,9 @@ struct RawGnssData {
     int32_t  lon_e7;       // degrees × 10^-7
     int32_t  speed_mms;    // mm/s
     int32_t  heading_e5;   // degrees × 10^-5 (true north referenced)
-    int16_t  mag_dec;      // magnetic variation — scale tbd (verify during debug)
-    uint16_t mag_acc;      // variation accuracy estimate — same scale as mag_dec
+    uint16_t year;         // UTC year (e.g. 2026)
+    uint8_t  month;        // UTC month 1–12
+    uint8_t  day;          // UTC day   1–31
     uint8_t  siv;          // satellites in view
     uint8_t  fix_type;     // 0=no fix, 3=3D, 4=GNSS+DR
     bool     fix_ok;       // getGnssFixOk()
@@ -38,9 +39,6 @@ public:
     // Non-blocking PVT read — returns true only when fresh data arrived
     bool read(RawGnssData &out);
 
-    // Direct accessors used by UBLOXProcessor::begin() for magvar probe
-    int16_t getMagDec();
-    uint16_t getMagAcc();
 
 private:
 
