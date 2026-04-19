@@ -55,6 +55,7 @@ void UBLOXProcessor::probeSensorMagVar() {
             float magvar_deg = (float)dec / MAG_DEC_SCALE;
             _magvar_rad = magvar_deg * DEG_TO_RAD;
             _magvar_source = MagVarSource::SENSOR;
+            _sensor_magvar_confirmed = true;
             Serial.printf("[GNSS] Sensor magvar OK: %.2f° (%.4f rad)\n",
                           magvar_deg, _magvar_rad);
             return;
@@ -96,6 +97,20 @@ void UBLOXProcessor::updateDelta(const RawGnssData &raw) {
         _delta.cog_t_rad = normaliseRad((float)raw.heading_e5 / 100000.0f * DEG_TO_RAD);
     } else {
         _delta.cog_t_rad = NAN;
+    }
+
+    // Periodically retry sensor magvar if initial probe failed
+    if (!_sensor_magvar_confirmed && raw.fix_ok &&
+        millis() - _last_magvar_probe_ms >= MAGVAR_RETRY_INTERVAL_MS) {
+        _last_magvar_probe_ms = millis();
+        if (raw.mag_dec != 0 && raw.mag_acc < 500) {
+            float magvar_deg = (float)raw.mag_dec / MAG_DEC_SCALE;
+            _magvar_rad = magvar_deg * DEG_TO_RAD;
+            _magvar_source = MagVarSource::SENSOR;
+            _sensor_magvar_confirmed = true;
+            Serial.printf("[GNSS] Sensor magvar confirmed: %.2f° (%.4f rad)\n",
+                          magvar_deg, _magvar_rad);
+        }
     }
 
     // Refresh magvar from sensor if that is the source

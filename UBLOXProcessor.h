@@ -78,6 +78,12 @@ private:
     // COG gating threshold — below this SOG, COG is noise
     static constexpr float COG_SOG_GATE_MS = 0.3f;   // ~0.6 kn
 
+    // getMagDec() retry — how often to re-probe sensor after initial failure
+    static constexpr uint32_t MAGVAR_RETRY_INTERVAL_MS = 60000;
+
+    bool     _sensor_magvar_confirmed = false;
+    uint32_t _last_magvar_probe_ms    = 0;
+
     // Probe sensor for native magnetic variation: take N readings and check if mag_dec != 0
     void probeSensorMagVar();
 

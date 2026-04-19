@@ -55,9 +55,13 @@ void SignalKBroker::sendDelta() {
     static float last_cog_t = NAN, last_cog_m = NAN;
     static float last_var = NAN;
 
-    bool ch_pos = (!validf(last_lat) || !validf(last_lon)
-                   || fabsf(d.lat_deg - last_lat) >= DB_POS_DEG
-                   || fabsf(d.lon_deg - last_lon) >= DB_POS_DEG);
+    uint32_t now = millis();
+    bool pos_heartbeat = (now - _last_pos_tx_ms) >= POS_HEARTBEAT_MS;
+
+    bool ch_pos = pos_heartbeat
+                  || !validf(last_lat) || !validf(last_lon)
+                  || fabsf(d.lat_deg - last_lat) >= DB_POS_DEG
+                  || fabsf(d.lon_deg - last_lon) >= DB_POS_DEG;
 
     bool ch_sog = validf(d.sog_ms) &&
                   (!validf(last_sog) || fabsf(d.sog_ms - last_sog) >= DB_SOG_MS);
@@ -99,6 +103,7 @@ void SignalKBroker::sendDelta() {
         pos["longitude"] = d.lon_deg;
         last_lat = d.lat_deg;
         last_lon = d.lon_deg;
+        _last_pos_tx_ms = now;
     }
 
     if (ch_sog)   { add("navigation.speedOverGround",          d.sog_ms);      last_sog   = d.sog_ms; }
