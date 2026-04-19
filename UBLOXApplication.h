@@ -5,6 +5,7 @@
 #include <WiFi.h>
 #include <ArduinoOTA.h>
 #include <esp_system.h>
+#include <esp_wifi.h>
 #include "WifiState.h"
 #include "UBLOXSensor.h"
 #include "UBLOXProcessor.h"
@@ -60,6 +61,10 @@ private:
     bool _sensor_ok = false;
     WifiState _wifi_state = WifiState::INIT;
 
+    // AP intruder detection — written in WiFi event callback, read in loop()
+    volatile bool _ap_intruder      = false;
+    uint8_t       _ap_intruder_mac[6] = {};
+
     // Subsystems — stack allocated, lifetime of the application
     UBLOXSensor _sensor;
     UBLOXProcessor _processor;
@@ -79,6 +84,7 @@ private:
     void handleESPNow(unsigned long now);
     void handleDisplay();
     void handleDiag(unsigned long now);
+    void handleAPIntruder();
 
     void initWifiServices();
     

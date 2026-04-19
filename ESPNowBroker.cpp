@@ -37,9 +37,13 @@ void ESPNowBroker::sendDelta() {
     if (!d.fix_ok || !validf(d.lat_deg) || !validf(d.lon_deg)) return;
 
     // Deadband check
-    bool ch_pos = (!validf(_last_lat) || !validf(_last_lon)
-                   || fabsf(d.lat_deg - _last_lat) >= DB_POS_DEG
-                   || fabsf(d.lon_deg - _last_lon) >= DB_POS_DEG);
+    uint32_t now = millis();
+    bool pos_heartbeat = (now - _last_pos_tx_ms) >= POS_HEARTBEAT_MS;
+
+    bool ch_pos = pos_heartbeat
+                  || !validf(_last_lat) || !validf(_last_lon)
+                  || fabsf(d.lat_deg - _last_lat) >= DB_POS_DEG
+                  || fabsf(d.lon_deg - _last_lon) >= DB_POS_DEG;
 
     bool ch_sog = validf(d.sog_ms) &&
                   (!validf(_last_sog) || fabsf(d.sog_ms - _last_sog) >= DB_SOG_MS);
@@ -67,7 +71,7 @@ void ESPNowBroker::sendDelta() {
 
     esp_now_send(BROADCAST_ADDR, (const uint8_t*)&pkt, sizeof(pkt));
 
-    if (ch_pos) { _last_lat = d.lat_deg; _last_lon = d.lon_deg; }
+    if (ch_pos) { _last_lat = d.lat_deg; _last_lon = d.lon_deg; _last_pos_tx_ms = now; }
     if (ch_sog) { _last_sog = d.sog_ms; }
     if (ch_cog) { _last_cog = d.cog_t_rad; }
 }

@@ -39,6 +39,17 @@ void UBLOXApplication::begin() {
     //    max 1 connection. This does not affect ESP-NOW (operates below association layer).
     WiFi.mode(WIFI_AP_STA);
     WiFi.softAP(AP_SSID, AP_PASS, 1 /*channel*/, 1 /*ssid_hidden*/, 1 /*max_connection*/);
+
+    // Register AP intruder handler — fires in FreeRTOS "arduino_events" task.
+    // Deauth the intruder immediately, then signal loop() via volatile flag.
+    // MAC is copied before setting the flag so loop() always reads a complete address.
+    WiFi.onEvent([this](arduino_event_id_t /*id*/, arduino_event_info_t info) {
+        uint8_t aid = info.wifi_ap_staconnected.aid;
+        memcpy(_ap_intruder_mac, info.wifi_ap_staconnected.mac, 6);
+        esp_wifi_deauth_sta(aid);  // kick immediately — ESP-IDF call
+        _ap_intruder = true;       // signal loop()
+    }, ARDUINO_EVENT_WIFI_AP_STACONNECTED);
+
     WiFi.setSleep(false);
     WiFi.begin(WIFI_SSID, WIFI_PASS);
     _wifi_state = WifiState::CONNECTING;
@@ -54,6 +65,7 @@ void UBLOXApplication::begin() {
 void UBLOXApplication::loop() {
     const unsigned long now = millis();
     this->handleWifi(now);
+    this->handleAPIntruder();
     this->handleOTA();
     this->handleWebUI();
     this->handleWebsocket(now);
@@ -179,6 +191,18 @@ void UBLOXApplication::handleDisplay() {
     _display.handle();
 }
 
+// AP intruder alert — deauth already done in event callback; log + display here
+void UBLOXApplication::handleAPIntruder() {
+    if (!_ap_intruder) return;
+    _ap_intruder = false;  // clear before Serial/display so a rapid second event isn't lost
+    char mac[18];
+    snprintf(mac, sizeof(mac), "%02X:%02X:%02X:%02X:%02X:%02X",
+             _ap_intruder_mac[0], _ap_intruder_mac[1], _ap_intruder_mac[2],
+             _ap_intruder_mac[3], _ap_intruder_mac[4], _ap_intruder_mac[5]);
+    Serial.printf("[AP] INTRUDER deauthed — MAC %s\n", mac);
+    _display.showInfoMessage("AP: INTRUDER!", mac);
+}
+
 // Periodic heap/stack diagnostics — every ~30 s
 void UBLOXApplication::handleDiag(unsigned long now) {
     if ((long)(now - _last_diag_ms) < (long)DIAG_INTERVAL_MS) return;
@@ -188,5 +212,15 @@ void UBLOXApplication::handleDiag(unsigned long now) {
     uint32_t wm = uxTaskGetStackHighWaterMark(nullptr) * sizeof(StackType_t);
     Serial.printf("[DIAG] heap=%lu B  stack_wm=%lu B\n",
                   (unsigned long)heap, (unsigned long)wm);
+
+    float mv = _processor.getMagVarRad();
+    const char* src = _processor.getMagVarSource() == MagVarSource::SENSOR  ? "sensor"
+                    : _processor.getMagVarSource() == MagVarSource::SIGNALK ? "signalk"
+                    : "unknown";
+    if (validf(mv))
+        Serial.printf("[DIAG] magvar=%.2f° src=%s\n", mv * RAD_TO_DEG, src);
+    else
+        Serial.printf("[DIAG] magvar=N/A src=%s\n", src);
+
     _display.showDiagData(heap, wm);
 }
