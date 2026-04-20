@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 200" width="480" height="200">
+
+  <!-- Background -->
+  <rect width="480" height="200" fill="#0d1117" rx="12"/>
+
+  <!-- Device: outer bezel ring -->
+  <circle cx="100" cy="100" r="88" fill="#1c2128" stroke="#30363d" stroke-width="3"/>
+
+  <!-- Device: inner screen (round display) -->
+  <circle cx="100" cy="100" r="72" fill="#0a0714"/>
+
+  <!-- Device: screen glow (violet) -->
+  <circle cx="100" cy="100" r="72" fill="none" stroke="#AA44FF" stroke-width="1.5" opacity="0.6"/>
+
+  <!-- SATELLITE SYMBOL -->
+  <!-- Body -->
+  <rect x="84" y="88" width="32" height="22" rx="4" fill="#0f0a1e" stroke="#AA44FF" stroke-width="2"/>
+
+  <!-- Left panel connector -->
+  <rect x="72" y="96" width="12" height="6" fill="#0f0a1e" stroke="#AA44FF" stroke-width="1.5"/>
+  <!-- Left solar panel -->
+  <rect x="40" y="90" width="32" height="18" rx="2" fill="#0f0a1e" stroke="#AA44FF" stroke-width="1.5"/>
+  <!-- Left panel grid lines -->
+  <line x1="56" y1="90" x2="56" y2="108" stroke="#AA44FF" stroke-width="1" opacity="0.5"/>
+
+  <!-- Right panel connector -->
+  <rect x="116" y="96" width="12" height="6" fill="#0f0a1e" stroke="#AA44FF" stroke-width="1.5"/>
+  <!-- Right solar panel -->
+  <rect x="128" y="90" width="32" height="18" rx="2" fill="#0f0a1e" stroke="#AA44FF" stroke-width="1.5"/>
+  <!-- Right panel grid lines -->
+  <line x1="144" y1="90" x2="144" y2="108" stroke="#AA44FF" stroke-width="1" opacity="0.5"/>
+
+  <!-- Antenna arm -->
+  <line x1="100" y1="88" x2="100" y2="76" stroke="#AA44FF" stroke-width="1.5"/>
+  <!-- Dish (parabolic arc, opening upward) -->
+  <path d="M 93 76 Q 100 68 107 76" fill="none" stroke="#AA44FF" stroke-width="2"/>
+
+  <!-- Body sensor (gold dot) -->
+  <circle cx="100" cy="99" r="5" fill="#0f0a1e" stroke="#FFCC00" stroke-width="1.5"/>
+  <circle cx="100" cy="99" r="2" fill="#FFCC00"/>
+
+  <!-- Signal beams downward -->
+  <path d="M 93 110 Q 84 122 90 131" fill="none" stroke="#AA44FF" stroke-width="1.2" opacity="0.6"/>
+  <path d="M 107 110 Q 116 122 110 131" fill="none" stroke="#AA44FF" stroke-width="1.2" opacity="0.6"/>
+
+  <!-- Specs text -->
+  <text x="100" y="148" text-anchor="middle" dominant-baseline="central"
+        font-family="monospace" font-size="10" fill="#7722CC">UBLOX MAX-M10S</text>
+
+  <!-- Text block: project name -->
+  <text x="200" y="68" font-family="monospace" font-size="20"
+        font-weight="bold" fill="#ffffff">UBLOX-ESP32-SignalK</text>
+  <text x="200" y="94" font-family="monospace" font-size="20"
+        font-weight="bold" fill="#AA44FF">Gateway</text>
+
+  <!-- Divider line -->
+  <line x1="200" y1="105" x2="460" y2="105" stroke="#30363d" stroke-width="1"/>
+
+  <!-- Subtitle lines -->
+  <text x="200" y="122" font-family="monospace" font-size="11"
+        fill="#8b949e">Marine GNSS sensor</text>
+  <text x="200" y="138" font-family="monospace" font-size="11"
+        fill="#8b949e">UBLOX&#xB7;ESP32&#xB7;SignalK&#xB7;ESP-NOW</text>
+
+  <!-- Badges row -->
+  <!-- Position badge -->
+  <rect x="200" y="150" width="68" height="18" rx="4" fill="#0f0a1e" stroke="#AA44FF" stroke-width="1"/>
+  <text x="234" y="163" text-anchor="middle" font-family="monospace" font-size="10"
+        fill="#AA44FF">Position</text>
+
+  <!-- SOG/COG badge -->
+  <rect x="274" y="150" width="68" height="18" rx="4" fill="#0f0a1e" stroke="#AA44FF" stroke-width="1"/>
+  <text x="308" y="163" text-anchor="middle" font-family="monospace" font-size="10"
+        fill="#AA44FF">SOG/COG</text>
+
+  <!-- MagVar badge -->
+  <rect x="348" y="150" width="60" height="18" rx="4" fill="#0f0a1e" stroke="#AA44FF" stroke-width="1"/>
+  <text x="378" y="163" text-anchor="middle" font-family="monospace" font-size="10"
+        fill="#AA44FF">Variation</text>
+
+</svg>
