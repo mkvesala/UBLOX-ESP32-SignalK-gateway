@@ -12,14 +12,11 @@ ESP32-based GNSS gateway reading position, speed over ground, and course over gr
 OTA firmware updates are enabled. Configuration is persisted to NVS. A web UI provides a status endpoint and password-protected configuration interface.
 
 Developed and tested on:
-- [SH-ESP32 (Sailor Hat ESP32)](https://docs.hatlabs.fi/sh-esp32/) development board
-- [ESP32 board package](https://github.com/espressif/arduino-esp32) (3.3.7)
+- [Wemos D1 R32 ESP32 development board](https://partco.fi/tuote/arduino-esp32-kehityskortti-esp-wroom-32-2526)
+- [ESP32 board package](https://github.com/espressif/arduino-esp32) (3.3.8)
 - [Arduino IDE](https://www.arduino.cc/en/software/) (2.3.8)
-- SignalK Server (2.23.0)
-- UBLOX MAX-M10S GNSS module (SparkFun SAM-M10Q or equivalent breakout)
-
-Integrated via ESP-NOW to:
-- [ESP32-Crowpanel-compass](https://github.com/mkvesala/ESP32-Crowpanel-compass) (v2.0.0)
+- SignalK Server (2.24.0)
+- [SparkFun GNSS Receiver Breakout MAX-M10S](https://www.sparkfun.com/sparkfun-gnss-receiver-breakout-max-m10s-qwiic.html)
 
 ## Purpose of the project
 
@@ -37,7 +34,7 @@ This is one of my individual digital boat projects. Use at your own risk. Not fo
 
 ## Classes
 
-Class diagram including the companion projects (this project not yet included — to be added):
+Class diagram including the companion projects:
 
 <img src="https://raw.githubusercontent.com/mkvesala/ESP32-Crowpanel-compass/main/docs/full_uml_diagram.jpeg" width="480">
 
@@ -177,8 +174,8 @@ LCD is auto-detected at startup — device boots normally if no display is conne
 
 ### Bill of materials
 
-1. SH-ESP32 (Sailor Hat ESP32) or equivalent ESP32 development board
-2. UBLOX MAX-M10S GNSS module with active antenna (I2C, address 0x42)
+1. Wemos R1 D32 or equivalent ESP32 development board
+2. Sparkfun UBLOX MAX-M10S GNSS module with active antenna (I2C, address 0x42)
 3. LCD 16x2 module with I2C backpack (optional, address 0x27)
 4. Wiring and connectors
 5. Enclosure, DC power supply
@@ -190,12 +187,12 @@ LCD is auto-detected at startup — device boots normally if no display is conne
 ## Software used
 
 1. Arduino IDE 2.3.8
-2. Espressif Systems esp32 board package 3.3.7
+2. Espressif Systems esp32 board package 3.3.8
 3. Additional libraries installed:
-   - SparkFun u-blox GNSS Arduino Library v3 (by SparkFun Electronics, version 3.x)
+   - SparkFun u-blox GNSS Arduino Library v3 (by SparkFun Electronics, version 3.1.13)
    - ArduinoWebsockets (by Gil Maimon, version 0.5.4)
    - ArduinoJson (by Benoit Blanchon, version 7.4.3)
-   - WMM_Tinier (by David Armstrong, version 1.0.0)
+   - WMM_Tinier (by David Armstrong, version 1.0.3)
    - LiquidCrystal_I2C (by Frank de Brabander, version 1.1.2)
 
 ## Installation
@@ -258,11 +255,7 @@ LCD is auto-detected at startup — device boots normally if no display is conne
 
 ## Credits
 
-Developed and tested using:
-
-- SH-ESP32 (Sailor Hat ESP32) development board
-- Espressif Systems esp32 3.3.7 package on Arduino IDE 2.3.8
-- SignalK Server version 2.23.0
+Hardware and libraries described earlier in this document.
 
 Developed by Matti Vesala in collaboration with Claude (Anthropic).
 
