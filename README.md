@@ -1,3 +1,5 @@
+![Logo](docs/projectlogo.svg)
+
 # UBLOX-ESP32-SignalK Gateway
 
 [![Platform: ESP32](https://img.shields.io/badge/Platform-ESP32-blue)](https://www.espressif.com/en/sdks/esp-arduino)
