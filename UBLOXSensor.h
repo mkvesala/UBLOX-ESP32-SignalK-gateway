@@ -12,6 +12,7 @@
 // - read() fetches the latest PVT data (non-blocking via getPVT(0))
 // - Owned by: UBLOXApplication
 // - Uses: TwoWire
+// - Owns: SFE_UBLOX_GNSS
 
 
 struct RawGnssData {

@@ -13,7 +13,8 @@
 // - update() reads sensor, converts units, computes magnetic variation via WMM
 // - getDelta() returns processed data for brokers
 // - Owned by: UBLOXApplication
-// - Uses: UBLOXSensor, TwoWire, WMM_Tinier, GnssDelta (struct)
+// - Uses: UBLOXSensor, TwoWire, GnssDelta (struct)
+// - Owns: WMM_Tinier
 
 class UBLOXProcessor {
 
@@ -51,7 +52,7 @@ public:
 private:
 
     UBLOXSensor &_sensor;
-    WMM_Tinier   _wmm;
+    WMM_Tinier _wmm;
 
     GnssDelta _delta;
     float _magvar_rad = NAN;

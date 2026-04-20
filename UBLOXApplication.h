@@ -43,9 +43,9 @@ private:
     static constexpr unsigned long MIN_TX_INTERVAL_MS    = 199;    // ~5 Hz SignalK
     static constexpr unsigned long ESPNOW_TX_INTERVAL_MS = 211;    // ~5 Hz ESP-NOW
     static constexpr unsigned long WIFI_STATUS_CHECK_MS  = 503;
-    static constexpr unsigned long WIFI_TIMEOUT_MS       = 90001;
+    static constexpr unsigned long WIFI_TIMEOUT_MS       = 179999; // ~3 mins
     static constexpr unsigned long WS_RETRY_MS           = 1999;
-    static constexpr unsigned long WS_RETRY_MAX_MS       = 119993;
+    static constexpr unsigned long WS_RETRY_MAX_MS       = 119993; // ~2 mins
     static constexpr unsigned long DIAG_INTERVAL_MS      = 30013;  // ~30 s
 
     // Timers
@@ -62,8 +62,8 @@ private:
     WifiState _wifi_state = WifiState::INIT;
 
     // AP intruder detection — written in WiFi event callback, read in loop()
-    volatile bool _ap_intruder      = false;
-    uint8_t       _ap_intruder_mac[6] = {};
+    volatile bool _ap_intruder = false;
+    uint8_t _ap_intruder_mac[6] = {};
 
     // Subsystems — stack allocated, lifetime of the application
     UBLOXSensor _sensor;
