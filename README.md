@@ -107,10 +107,10 @@ ws://<server>:<port>/signalk/v1/stream?token=<optional>
 
 | SignalK path | Unit | Notes |
 |---|---|---|
-| `navigation.position` | decimal degrees | Deadband ~1.1 m; heartbeat every 10 s regardless |
+| `navigation.position` | decimal degrees | Deadband ~1.1 m; heartbeat every 1 s regardless |
 | `navigation.speedOverGround` | m/s | Deadband 0.05 m/s (~0.1 kn) |
 | `navigation.courseOverGroundTrue` | radians | Deadband 0.5°; only when SOG ≥ 0.3 m/s |
-| `navigation.magneticVariation` | radians | Deadband 0.5°; computed via WMM_Tinier |
+| `navigation.magneticVariation` | radians | Deadband 0.5°; heartbeat every 1 s; computed via WMM_Tinier |
 
 Source name is auto-derived from the device MAC address: `esp32.ublox-XXYYZZ`.
 

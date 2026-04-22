@@ -26,13 +26,13 @@ data to both a SignalK server and the ESP-NOW network.
 - Publishes: `navigation.position`, `navigation.speedOverGround`,
   `navigation.courseOverGroundTrue`, `navigation.magneticVariation`
 - Deadband filtering: position ~1.1 m, SOG 0.05 m/s, COG 0.5°, declination 0.5°
-- Position heartbeat: position published at least every 10 s regardless of deadband
+- Heartbeat: position and magnetic variation published at least every 1 s regardless of deadband
 - WebSocket reconnection with exponential backoff (2 s → 120 s)
 - Source name derived from ESP32 MAC address: `esp32.ublox-xxxxxx`
 
 **ESP-NOW output**
 - Broadcasts `ESPNowPacket<GnssDelta>` to all listeners
-- Same deadband and heartbeat logic as SignalK output
+- Same deadband and 1 s heartbeat logic as SignalK output
 - Works without WiFi association (ESP-NOW operates below the WiFi layer)
 - Packet format: shared `espnow_protocol.h` (header + payload, 24 bytes)
 
@@ -52,7 +52,6 @@ data to both a SignalK server and the ESP-NOW network.
 **Other**
 - NVS settings (UBLOXPreferences): configuration persisted to ESP32 flash
 - LCD display (I2C, LiquidCrystal_I2C): shows status, position, and diagnostics
-- Periodic diagnostics to Serial (~30 s): heap, stack watermark, magvar + source
 - WiFi state machine with automatic reconnection
 - `WIFI_AP_STA` mode enables concurrent ESP-NOW and WiFi-STA operation
 

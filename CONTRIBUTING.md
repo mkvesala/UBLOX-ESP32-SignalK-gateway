@@ -94,10 +94,10 @@ Feature requests are welcome! Please:
 ## Testing checklist
 
 * [ ] ESP32 boots without errors
-* [ ] UBLOX MAX-M10S detected on I2C (0x42), 6 Hz autoPVT confirmed in Serial monitor
-* [ ] GPS fix acquired outdoors; `fix_ok`, fix type, and satellite count visible in Serial monitor
+* [ ] UBLOX MAX-M10S detected on I2C (0x42); LCD shows fix status and satellite count
+* [ ] GPS fix acquired outdoors; `fix_ok`, fix type, and satellite count visible on LCD and `/status` endpoint
 * [ ] `navigation.position` updates in SignalK Data Browser when moving > ~1.1 m
-* [ ] `navigation.position` heartbeat fires every ~10 s even when stationary
+* [ ] `navigation.position` heartbeat fires every ~1 s even when stationary
 * [ ] `navigation.speedOverGround` updates correctly (SI units, m/s)
 * [ ] `navigation.courseOverGroundTrue` updates when moving; absent when SOG < 0.3 m/s
 * [ ] `navigation.magneticVariation` published and plausible for current location
@@ -109,8 +109,8 @@ Feature requests are welcome! Please:
 * [ ] AP intrusion detection fires on unexpected connection attempt: Serial log shows MAC, display shows alert
 * [ ] WebSocket reconnection with exponential backoff works after server restart
 * [ ] OTA updates are successful
-* [ ] No memory leaks (monitor heap in Serial diagnostics, ~30 s interval)
-* [ ] FreeRTOS task stack watermarks stay in reasonable limits (monitor)
+* [ ] No memory leaks (monitor heap via `/status` JSON endpoint)
+* [ ] FreeRTOS task stack watermarks stay in reasonable limits (monitor via `/status`)
 
 ## Development environment
 
@@ -119,15 +119,15 @@ Feature requests are welcome! Please:
 [README.md](README.md) for details.
 
 - Arduino IDE 2.3.8
-- ESP32 board package 3.3.7
+- ESP32 board package 3.3.8
 - Required libraries
-- SignalK server 2.23.0
+- SignalK server 2.24.0
 
 ### Hardware requirements
 
 [README.md](README.md) for details.
 
-- ESP32 development board (SH-ESP32 or equivalent)
+- ESP32 development board (Wemos D1 R32 or equivalent)
 - UBLOX MAX-M10S GNSS module with active antenna (I2C, address 0x42)
 - (Optional) LCD 16x2 display with I2C backpack
 
