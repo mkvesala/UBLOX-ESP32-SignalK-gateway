@@ -11,7 +11,7 @@
 
 ESP32-based GNSS gateway reading position, speed over ground, and course over ground from a [UBLOX MAX-M10S](https://www.u-blox.com/en/product/max-m10-series) module. Sends navigation data to a [SignalK](https://signalk.org) server via WebSocket/JSON and to other ESP32 devices via ESP-NOW broadcast. Magnetic variation is computed from GPS position and date using the WMM_Tinier geomagnetic model.
 
-OTA firmware updates are enabled. Configuration is persisted to NVS. A web UI provides a status endpoint and password-protected configuration interface.
+OTA firmware updates are enabled. NVS persistence and the web UI skeletons reserved for future usage.
 
 Developed and tested on:
 - [Wemos D1 R32 ESP32 development board](https://partco.fi/tuote/arduino-esp32-kehityskortti-esp-wroom-32-2526)
@@ -19,6 +19,9 @@ Developed and tested on:
 - [Arduino IDE](https://www.arduino.cc/en/software/) (2.3.8)
 - SignalK Server (2.24.0)
 - [SparkFun GNSS Receiver Breakout MAX-M10S](https://www.sparkfun.com/sparkfun-gnss-receiver-breakout-max-m10s-qwiic.html)
+
+Integrated via ESP-NOW with:
+- [ESP32-Crowpanel-compass](https://github.com/mkvesala/ESP32-Crowpanel-compass) (v3.2.1)
 
 ## Purpose of the project
 
@@ -41,7 +44,8 @@ Class diagram including the companion projects:
 <img src="https://raw.githubusercontent.com/mkvesala/ESP32-Crowpanel-compass/main/docs/full_uml_diagram.jpeg" width="480">
 
 **`UBLOXSensor`:**
-- Uses: `SFE_UBLOX_GNSS`, `TwoWire`
+- Uses: `TwoWire`
+- Owns: `SFE_UBLOX_GNSS`
 - Owned by: `UBLOXApplication`
 - Responsible for: I2C communication with the MAX-M10S module; exposes raw PVT data with no processing
 
@@ -148,7 +152,7 @@ LCD is auto-detected at startup — device boots normally if no display is conne
 
 ### WiFi and OTA
 
-- WiFi state machine: `INIT → CONNECTING → CONNECTED`, with a 90-second connection timeout and automatic fallback to `OFF` on failure or missing SSID
+- WiFi state machine: `INIT → CONNECTING → CONNECTED`, with a 3 min connection timeout and automatic fallback to `OFF` on failure or missing SSID
 - Auto-reconnect on dropped connection
 - ArduinoOTA enabled immediately after WiFi connects; hostname is set to the SignalK source name
 - Without WiFi the device still broadcasts via ESP-NOW at full rate
@@ -173,6 +177,10 @@ LCD is auto-detected at startup — device boots normally if no display is conne
 | `UBLOXApplication.h / .cpp` | Class `UBLOXApplication` — top-level orchestrator |
 
 ## Hardware
+
+### Schematic
+
+<img src="docs/ubloxschema.png" width="480">
 
 ### Bill of materials
 
@@ -265,6 +273,10 @@ Check [CONTRIBUTING.md](CONTRIBUTING.md) for further information on AI-assisted 
 
 I would highly appreciate improvement suggestions as well as any Arduino-style ESP32/C++ coding advice.
 
-This is a companion project to [CMPS14-ESP32-SignalK-gateway](https://github.com/mkvesala/CMPS14-ESP32-SignalK-gateway), [BME280-ESP32-SignalK-gateway](https://github.com/mkvesala/BME280-ESP32-SignalK-gateway), and [ESP32-Crowpanel-compass](https://github.com/mkvesala/ESP32-Crowpanel-compass). Check the UML diagram to see how these projects relate:
+This is a companion project to [CMPS14-ESP32-SignalK-gateway](https://github.com/mkvesala/CMPS14-ESP32-SignalK-gateway), [BME280-ESP32-SignalK-gateway](https://github.com/mkvesala/BME280-ESP32-SignalK-gateway), [VEDirect-ESP32-SignalK-gateway](https://github.com/mkvesala/VEDirect-ESP32-SignalK-gateway) and [ESP32-Crowpanel-compass](https://github.com/mkvesala/ESP32-Crowpanel-compass). Check the UML diagram to see how these projects relate:
 
 <img src="https://raw.githubusercontent.com/mkvesala/ESP32-Crowpanel-compass/main/docs/full_uml_diagram.jpeg" width="480">
+
+## Gallery
+
+<img src="https://raw.githubusercontent.com/mkvesala/ESP32-Crowpanel-compass/main/docs/full_uml_diagram.jpeg" width="240"> <img src="docs/ublox1.jpeg" width="240"> <img src="docs/ublox2.jpeg" width="240"> <img src="docs/ubloxschema.png" width="240">
