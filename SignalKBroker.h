@@ -52,7 +52,7 @@ private:
     static constexpr float    DB_SOG_MS         = 0.05f;     // ~0.1 kn
     static constexpr float    DB_COG_RAD        = 0.00873f;  // 0.5°
     static constexpr float    DB_VAR_RAD        = 0.00873f;  // 0.5°
-    static constexpr uint32_t POS_HEARTBEAT_MS  = 10000;     // force position every 10 s
+    static constexpr uint32_t POS_HEARTBEAT_MS  = 1000;     // force position every 1 s
 
     uint32_t _last_pos_tx_ms = 0;
 

@@ -34,7 +34,7 @@ private:
     float _last_cog = NAN;
 
     static constexpr float DB_POS_DEG = 0.00001f;  // ~1.1 m
-    static constexpr uint32_t POS_HEARTBEAT_MS = 10000;
+    static constexpr uint32_t POS_HEARTBEAT_MS = 1000;
 
     uint32_t _last_pos_tx_ms = 0;
     static constexpr float DB_SOG_MS = 0.05f;
