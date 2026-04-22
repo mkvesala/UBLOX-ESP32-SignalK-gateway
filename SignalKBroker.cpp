@@ -68,7 +68,7 @@ void SignalKBroker::sendDelta() {
                      fabsf(computeAngDiffRad(d.cog_t_rad, last_cog_t)) >= DB_COG_RAD);
 
     bool ch_var = validf(d.mag_var_rad) &&
-                  (!validf(last_var) || fabsf(d.mag_var_rad - last_var) >= DB_VAR_RAD);
+                  (pos_heartbeat || !validf(last_var) || fabsf(d.mag_var_rad - last_var) >= DB_VAR_RAD);
 
     if (!(ch_pos || ch_sog || ch_cog_t || ch_var)) return;
 
