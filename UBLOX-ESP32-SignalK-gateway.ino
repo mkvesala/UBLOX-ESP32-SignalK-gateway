@@ -15,11 +15,11 @@ void setup() {
     app.begin();
 
     if (!app.sensorOk()) {
-        Serial.println("[MAIN] SENSOR INIT FAILED — CHECK WIRING!");
+        // Serial.println("[MAIN] SENSOR INIT FAILED — CHECK WIRING!");
         while (1) delay(1999);
     }
 
-    Serial.println("[MAIN] Setup complete");
+    // Serial.println("[MAIN] Setup complete");
 }
 
 void loop() {

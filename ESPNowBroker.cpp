@@ -9,7 +9,7 @@ ESPNowBroker::ESPNowBroker(UBLOXProcessor &processorRef)
 // Initialise ESP-NOW and register broadcast peer
 bool ESPNowBroker::begin() {
     if (esp_now_init() != ESP_OK) {
-        Serial.println("[ESPNOW] init failed");
+        // Serial.println("[ESPNOW] init failed");
         return false;
     }
 
@@ -18,14 +18,14 @@ bool ESPNowBroker::begin() {
     peer.channel = 0;
     peer.encrypt = false;
     if (esp_now_add_peer(&peer) != ESP_OK) {
-        Serial.println("[ESPNOW] add broadcast peer failed");
+        // Serial.println("[ESPNOW] add broadcast peer failed");
         return false;
     }
 
     esp_now_register_send_cb(onDataSent);
 
     _initialized = true;
-    Serial.println("[ESPNOW] begin() OK");
+    // Serial.println("[ESPNOW] begin() OK");
     return true;
 }
 

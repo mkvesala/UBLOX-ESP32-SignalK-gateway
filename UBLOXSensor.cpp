@@ -9,7 +9,7 @@ bool UBLOXSensor::begin(TwoWire &wirePort) {
     _wire = &wirePort;
 
     if (!_gnss.begin(wirePort, GNSS_ADDR)) {
-        Serial.println("[GNSS] begin() failed — module not found at 0x42");
+        // Serial.println("[GNSS] begin() failed — module not found at 0x42");
         return false;
     }
 
@@ -22,7 +22,7 @@ bool UBLOXSensor::begin(TwoWire &wirePort) {
     // Enable automatic PVT output so getPVT(0) works non-blocking
     _gnss.setAutoPVT(true);
 
-    Serial.println("[GNSS] begin() OK — 6 Hz, UBX only, autoPVT on");
+    // Serial.println("[GNSS] begin() OK — 6 Hz, UBX only, autoPVT on");
     return true;
 }
 
