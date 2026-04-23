@@ -154,4 +154,35 @@ namespace ESPNow {
         return data;
     }
 
+    // Internal struct for GNSS data, values stored scaled x10 for integer arithmetic.
+    struct GnssData {
+        uint16_t cog_true_x10;   // COG true 0-3599 (0.0° - 359.9°)
+        uint16_t sog_knots_x10;  // SOG in knots × 10 (e.g. 72 = 7.2 kn)
+        uint8_t  fix_ok;         // 1 = valid fix (getGnssFixOk())
+
+        GnssData()
+            : cog_true_x10(0)
+            , sog_knots_x10(0)
+            , fix_ok(0)
+        {}
+
+        uint16_t getCogDeg()   const { return cog_true_x10  / 10; }
+        float    getSogKnots() const { return sog_knots_x10 / 10.0f; }
+        bool     hasFix()      const { return fix_ok == 1; }
+    };
+
+    // Convert GnssDelta (float wire format) to GnssData (int x10, internal)
+    inline GnssData convertGnssDeltaToData(const GnssDelta& delta) {
+        GnssData data;
+        constexpr float RAD_TO_DEG_X10  = 180.0f * 10.0f / M_PI;
+        constexpr float MS_TO_KNOTS_X10 = 1.94384f * 10.0f;
+
+        // COG: 0–2π → 0–3599
+        data.cog_true_x10  = (uint16_t)(delta.cog_true_rad * RAD_TO_DEG_X10);
+        data.sog_knots_x10 = (uint16_t)(delta.sog_ms * MS_TO_KNOTS_X10);
+        data.fix_ok        = delta.fix_ok;
+
+        return data;
+    }
+
 } // namespace ESPNow
