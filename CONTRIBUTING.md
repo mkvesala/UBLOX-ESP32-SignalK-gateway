@@ -136,23 +136,17 @@ Feature requests are welcome! Please:
 ### Policy
 
 1. **Using AI tools is allowed and encouraged** - ChatGPT, Claude Code, Github Copilot or IDE AI copilots, whatever works for you
-2. **Transparency is important**  - be open and mention in code comments, commit messages and PRs that AI has assisted you in development
+2. **Transparency is important**  - be open and mention that AI has assisted you in development
 3. **Understanding first** - you are responsible for not only the code itself but also being able to explain it
 
 ### Best practises
 
-1. **Always test** - AI-assisted code requires especially careful testing
-2. **Check security** - ensure that there are no vulnerabilities
-3. **Match style** - verify that the code follows the project's conventions and coding guidelines
-4. **Share learnings** - if AI helped you to solve a problem, share it in comments, PRs or discussions
-5. **Focus on prompting** - at least prompt: *role, task, tone, audience, restrictions/limits/guardrails, output format, output verification, list of sources used*
-6. **Use different tools and prompts** - prompt several times, with different AI tools, different day, seek cross-verification
-
-### Avoid
-
-1. **Copy-pasting code without understanding what it does**
-2. **Blindly trusting AI tools without validation**
-3. **Shifting responsibility to AI - you are the author**
+1. **Always test** 
+2. **Check security** 
+3. **Match coding style** 
+4. **Share learnings** 
+5. **Put effort on prompting and building skills**
+6. **Document skills or other assets in use**
 
 ### Copyright
 

@@ -269,7 +269,7 @@ Hardware and libraries described earlier in this document.
 
 Developed by Matti Vesala in collaboration with Claude (Anthropic).
 
-Check [CONTRIBUTING.md](CONTRIBUTING.md) for further information on AI-assisted development in the project.
+Check [CONTRIBUTING.md](CONTRIBUTING.md) for further information on development in the project.
 
 I would highly appreciate improvement suggestions as well as any Arduino-style ESP32/C++ coding advice.
 
