@@ -24,9 +24,13 @@ data to both a SignalK server and the ESP-NOW network.
 
 **SignalK output (WebSocket)**
 - Publishes: `navigation.position`, `navigation.speedOverGround`,
-  `navigation.courseOverGroundTrue`, `navigation.magneticVariation`
-- Deadband filtering: position ~1.1 m, SOG 0.05 m/s, COG 0.5°, declination 0.5°
-- Heartbeat: position and magnetic variation published at least every 1 s regardless of deadband
+  `navigation.courseOverGroundTrue`, `navigation.magneticVariation`,
+  `navigation.gnss.satellites`, `navigation.gnss.type`, `navigation.gnss.methodQuality`
+- `navigation.gnss.type` is constant `"Combined GPS+GLONASS"` (MAX-M10S is multi-constellation)
+- `navigation.gnss.methodQuality` maps UBX fix_type to SignalK enum (`"no GPS"`, `"Estimated (DR) mode"`, `"GNSS Fix"`)
+- `navigation.gnss.satellites` and GNSS status fields sent with every transmission (no separate deadband)
+- Deadband filtering: position ~0.5 m, SOG 0.025 m/s (~0.05 kn), COG 0.1°, declination 0.1°
+- Heartbeat: position and magnetic variation published at least every 0.5 s regardless of deadband
 - WebSocket reconnection with exponential backoff (2 s → 120 s)
 - Source name derived from ESP32 MAC address: `esp32.ublox-xxxxxx`
 

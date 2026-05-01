@@ -10,7 +10,8 @@
 // === S I G N A L K B R O K E R ===
 //
 // - WebSocket connection to SignalK server
-// - Sends: navigation.position, speedOverGround, courseOverGroundTrue, magneticVariation
+// - Sends: navigation.position, speedOverGround, courseOverGroundTrue, magneticVariation,
+//          navigation.gnss.satellites, navigation.gnss.type, navigation.gnss.methodQuality
 // - Owned by: UBLOXApplication
 // - Owns: WebsocketsClient
 // - Uses: UBLOXProcessor
@@ -40,8 +41,8 @@ private:
     UBLOXProcessor &_processor;
     websockets::WebsocketsClient _ws;
 
-    // Reusable JSON document — position obj + 3 float paths
-    StaticJsonDocument<512> _delta_doc;
+    // Reusable JSON document — position obj + 5 value paths
+    StaticJsonDocument<768> _delta_doc;
 
     bool _ws_open = false;
     char _sk_url[512] {};
@@ -59,5 +60,6 @@ private:
     void setSignalKURL();
     void setSignalKSource();
     void onEventCallback(websockets::WebsocketsEvent event);
+    static const char* methodQualityStr(uint8_t ft);
     
 };

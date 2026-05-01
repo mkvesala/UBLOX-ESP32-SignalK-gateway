@@ -103,9 +103,12 @@ void SignalKBroker::sendDelta() {
     if (ch_cog_t) { add("navigation.courseOverGroundTrue", d.cog_t_rad);   last_cog_t = d.cog_t_rad; }
     if (ch_var)   { add("navigation.magneticVariation",    d.mag_var_rad); last_var   = d.mag_var_rad; }
 
-    if (values.size() == 0) return;
+    // Always include GNSS status fields with every transmission
+    { auto o = values.createNestedObject(); o["path"] = "navigation.gnss.satellites";     o["value"] = (int)d.satellites; }
+    { auto o = values.createNestedObject(); o["path"] = "navigation.gnss.type";           o["value"] = "Combined GPS+GLONASS"; }
+    { auto o = values.createNestedObject(); o["path"] = "navigation.gnss.methodQuality";  o["value"] = methodQualityStr(d.fix_type); }
 
-    char buf[512];
+    char buf[768];
     size_t n = serializeJson(_delta_doc, buf, sizeof(buf));
     bool ok = _ws.send(buf, n);
     if (!ok) {
@@ -115,6 +118,17 @@ void SignalKBroker::sendDelta() {
 }
 
 // === P R I V A T E ===
+
+// Map UBX fix_type (0–4) to SignalK navigation.gnss.methodQuality enum value
+const char* SignalKBroker::methodQualityStr(uint8_t ft) {
+    switch (ft) {
+        case 1:  return "Estimated (DR) mode";
+        case 2:  return "GNSS Fix";
+        case 3:  return "GNSS Fix";
+        case 4:  return "GNSS Fix";
+        default: return "no GPS";
+    }
+}
 
 // Build SignalK websocket URL from secrets.h constants
 void SignalKBroker::setSignalKURL() {

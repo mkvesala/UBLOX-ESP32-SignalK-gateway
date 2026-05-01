@@ -97,7 +97,7 @@ Class diagram including the companion projects:
 ### GNSS reading
 
 1. Reads position (lat/lon), speed over ground, course over ground, satellite count, and fix type from UBLOX MAX-M10S over I2C at 6 Hz
-2. COG is gated: published only when SOG ≥ 0.3 m/s (~0.6 kn) to suppress noise when stationary
+2. COG is gated: published only when SOG ≥ 0.2 m/s (~0.4 kn) to suppress noise when stationary
 3. Magnetic variation is computed each cycle from GPS position and UTC date using the WMM_Tinier geomagnetic model
 
 ### SignalK communication
@@ -111,10 +111,13 @@ ws://<server>:<port>/signalk/v1/stream?token=<optional>
 
 | SignalK path | Unit | Notes |
 |---|---|---|
-| `navigation.position` | decimal degrees | Deadband ~1.1 m; heartbeat every 1 s regardless |
-| `navigation.speedOverGround` | m/s | Deadband 0.05 m/s (~0.1 kn) |
-| `navigation.courseOverGroundTrue` | radians | Deadband 0.5°; only when SOG ≥ 0.3 m/s |
-| `navigation.magneticVariation` | radians | Deadband 0.5°; heartbeat every 1 s; computed via WMM_Tinier |
+| `navigation.position` | decimal degrees | Deadband ~0.5 m; heartbeat every 0.5 s regardless |
+| `navigation.speedOverGround` | m/s | Deadband 0.025 m/s (~0.05 kn) |
+| `navigation.courseOverGroundTrue` | radians | Deadband 0.1°; only when SOG ≥ 0.2 m/s |
+| `navigation.magneticVariation` | radians | Deadband 0.1°; heartbeat every 0.5 s; computed via WMM_Tinier |
+| `navigation.gnss.satellites` | integer | Sent with every transmission; no separate deadband |
+| `navigation.gnss.type` | string | Constant `"Combined GPS+GLONASS"` (MAX-M10S is multi-constellation) |
+| `navigation.gnss.methodQuality` | string | Maps UBX fix_type: `"no GPS"` / `"Estimated (DR) mode"` / `"GNSS Fix"` |
 
 Source name is auto-derived from the device MAC address: `esp32.ublox-XXYYZZ`.
 
