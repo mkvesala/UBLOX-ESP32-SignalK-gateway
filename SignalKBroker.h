@@ -48,11 +48,11 @@ private:
     char _sk_source[32] {};
 
     // Deadband thresholds
-    static constexpr float    DB_POS_DEG        = 0.00001f;  // ~1.1 m
-    static constexpr float    DB_SOG_MS         = 0.05f;     // ~0.1 kn
-    static constexpr float    DB_COG_RAD        = 0.00873f;  // 0.5°
-    static constexpr float    DB_VAR_RAD        = 0.00873f;  // 0.5°
-    static constexpr uint32_t POS_HEARTBEAT_MS  = 1000;     // force position every 1 s
+    static constexpr float    DB_POS_DEG        = 0.000005f;  // ~0.5 m
+    static constexpr float    DB_SOG_MS         = 0.025f;     // ~0.05 kn
+    static constexpr float    DB_COG_RAD        = 0.001745f;  // 0.1°
+    static constexpr float    DB_VAR_RAD        = 0.001745f;  // 0.1°
+    static constexpr uint32_t POS_HEARTBEAT_MS  = 500;     // force position every 0.5 s
 
     uint32_t _last_pos_tx_ms = 0;
 

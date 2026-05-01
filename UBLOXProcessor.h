@@ -58,7 +58,7 @@ private:
     float _magvar_rad = NAN;
 
     // COG gating threshold — below this SOG, COG is noise
-    static constexpr float COG_SOG_GATE_MS = 0.3f;   // ~0.6 kn
+    static constexpr float COG_SOG_GATE_MS = 0.2f;   // ~0.4 kn
 
     void updateDelta(const RawGnssData &raw);
 

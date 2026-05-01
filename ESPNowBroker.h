@@ -33,12 +33,12 @@ private:
     float _last_sog = NAN;
     float _last_cog = NAN;
 
-    static constexpr float DB_POS_DEG = 0.00001f;  // ~1.1 m
-    static constexpr uint32_t POS_HEARTBEAT_MS = 1000;
+    static constexpr float DB_POS_DEG = 0.000005f;  // ~0.5 m
+    static constexpr uint32_t POS_HEARTBEAT_MS = 500;
 
     uint32_t _last_pos_tx_ms = 0;
-    static constexpr float DB_SOG_MS = 0.05f;
-    static constexpr float DB_COG_RAD = 0.00873f;
+    static constexpr float DB_SOG_MS = 0.025f;
+    static constexpr float DB_COG_RAD = 0.001745f;
 
     static constexpr uint8_t BROADCAST_ADDR[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
