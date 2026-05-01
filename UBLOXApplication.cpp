@@ -34,6 +34,10 @@ void UBLOXApplication::begin() {
     // 5. Bluetooth not needed
     btStop();
 
+    // Log reset reason — reveals watchdog, panic, stack overflow etc.
+    esp_reset_reason_t rr = esp_reset_reason();
+    Serial.printf("[APP] Reset reason: %d\n", (int)rr);
+
     // 6. WiFi AP_STA required for ESP-NOW + WiFi coexistence.
     //    softAP() secures the AP interface immediately: hidden SSID, WPA2 password,
     //    max 1 connection. This does not affect ESP-NOW (operates below association layer).
@@ -91,7 +95,7 @@ void UBLOXApplication::handleWifi(unsigned long now) {
             wl_status_t status = WiFi.status();
             if (status == WL_CONNECTED) {
                 _wifi_state = WifiState::CONNECTED;
-                // Serial.printf("[WIFI] Connected — IP %s\n", WiFi.localIP().toString().c_str());
+                Serial.printf("[WIFI] Connected — IP %s\n", WiFi.localIP().toString().c_str());
                 _display.showInfoMessage("WiFi OK", WiFi.localIP().toString().c_str());
                 this->initWifiServices();
                 _expn_retry_ms = WS_RETRY_MS;
@@ -99,13 +103,13 @@ void UBLOXApplication::handleWifi(unsigned long now) {
                 _wifi_state = WifiState::OFF;
                 WiFi.disconnect(true);
                 WiFi.mode(WIFI_OFF);
-                // Serial.println("[WIFI] Connection timeout — WiFi off");
+                Serial.println("[WIFI] Connection timeout — WiFi off");
                 _display.showInfoMessage("WiFi timeout", "Running offline");
             } else if (status == WL_CONNECT_FAILED || status == WL_NO_SSID_AVAIL) {
                 _wifi_state = WifiState::OFF;
                 WiFi.disconnect(true);
                 WiFi.mode(WIFI_OFF);
-                // Serial.println("[WIFI] Connection failed — WiFi off");
+                Serial.println("[WIFI] Connection failed — WiFi off");
                 _display.showInfoMessage("WiFi failed", "Running offline");
             }
             break;
@@ -117,7 +121,7 @@ void UBLOXApplication::handleWifi(unsigned long now) {
                 WiFi.disconnect();
                 WiFi.begin(WIFI_SSID, WIFI_PASS);
                 _wifi_conn_start_ms = now;
-                // Serial.println("[WIFI] Lost — reconnecting...");
+                Serial.println("[WIFI] Lost — reconnecting...");
             }
             break;
 
@@ -128,8 +132,11 @@ void UBLOXApplication::handleWifi(unsigned long now) {
     }
 }
 
-// Initialise WiFi-dependent services — called once on first connect
+// Initialise WiFi-dependent services — called once only (guard prevents repeat on reconnect)
 void UBLOXApplication::initWifiServices() {
+    if (_wifi_services_started) return;
+    _wifi_services_started = true;
+
     _signalk.begin();
 
     ArduinoOTA.setHostname(_signalk.getSignalKSource());
@@ -210,14 +217,17 @@ void UBLOXApplication::handleDiag(unsigned long now) {
 
     uint32_t heap = ESP.getFreeHeap();
     uint32_t wm = uxTaskGetStackHighWaterMark(nullptr) * sizeof(StackType_t);
-    // Serial.printf("[DIAG] heap=%lu B  stack_wm=%lu B\n",
-    //               (unsigned long)heap, (unsigned long)wm);
+    Serial.printf("[DIAG] heap=%lu B  stack_wm=%lu B\n",
+                  (unsigned long)heap, (unsigned long)wm);
+
+    if (heap < 20000)
+        Serial.printf("[DIAG] WARNING: low heap %lu B\n", (unsigned long)heap);
 
     float mv = _processor.getMagVarRad();
     if (validf(mv))
-        // Serial.printf("[DIAG] magvar=%.2f° src=wmm\n", mv * RAD_TO_DEG);
-    // else
-    //     Serial.printf("[DIAG] magvar=N/A src=wmm\n");
+        Serial.printf("[DIAG] magvar=%.2f° src=wmm\n", mv * RAD_TO_DEG);
+    else
+        Serial.printf("[DIAG] magvar=N/A src=wmm\n");
 
     _display.showDiagData(heap, wm);
 }

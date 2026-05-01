@@ -9,7 +9,7 @@
 
 // === W E B U I M A N A G E R ===
 //
-// - HTTP configuration interface — skeleton
+// - HTTP server: /status debug endpoint (no auth)
 // - Authentication and full UI to be added later (see CMPS14 reference)
 // - Owned by: UBLOXApplication
 // - Uses: UBLOXProcessor, UBLOXPreferences, SignalKBroker, DisplayManager
@@ -36,5 +36,7 @@ private:
     UBLOXPreferences &_prefs;
     SignalKBroker &_signalk;
     DisplayManager &_display;
+
+    void handleStatus();
 
 };
