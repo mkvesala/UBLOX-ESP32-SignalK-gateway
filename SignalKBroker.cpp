@@ -47,10 +47,13 @@ void SignalKBroker::sendDelta() {
     if (!d.fix_ok || !validf(d.lat_deg) || !validf(d.lon_deg)) return;
 
     // --- Deadband tracking ---
-    static float last_lat = NAN, last_lon = NAN;
-    static float last_sog = NAN;
-    static float last_cog_t = NAN;
-    static float last_var = NAN;
+    static float   last_lat      = NAN;
+    static float   last_lon      = NAN;
+    static float   last_sog      = NAN;
+    static float   last_cog_t    = NAN;
+    static float   last_var      = NAN;
+    static uint8_t last_sat      = 0xFF;  // 0xFF = not yet sent
+    static uint8_t last_fix_type = 0xFF;
 
     uint32_t now = millis();
     bool pos_heartbeat = (now - _last_pos_tx_ms) >= POS_HEARTBEAT_MS;
@@ -70,7 +73,9 @@ void SignalKBroker::sendDelta() {
     bool ch_var = validf(d.mag_var_rad) &&
                   (pos_heartbeat || !validf(last_var) || fabsf(d.mag_var_rad - last_var) >= DB_VAR_RAD);
 
-    if (!(ch_pos || ch_sog || ch_cog_t || ch_var)) return;
+    bool ch_sat = (last_sat == 0xFF) || (d.satellites != last_sat) || (d.fix_type != last_fix_type);
+
+    if (!(ch_pos || ch_sog || ch_cog_t || ch_var || ch_sat)) return;
 
     // --- Build JSON delta ---
     _delta_doc.clear();
@@ -107,6 +112,8 @@ void SignalKBroker::sendDelta() {
     { auto o = values.createNestedObject(); o["path"] = "navigation.gnss.satellites";     o["value"] = (int)d.satellites; }
     { auto o = values.createNestedObject(); o["path"] = "navigation.gnss.type";           o["value"] = "Combined GPS+GLONASS"; }
     { auto o = values.createNestedObject(); o["path"] = "navigation.gnss.methodQuality";  o["value"] = methodQualityStr(d.fix_type); }
+    last_sat      = d.satellites;
+    last_fix_type = d.fix_type;
 
     char buf[768];
     size_t n = serializeJson(_delta_doc, buf, sizeof(buf));
