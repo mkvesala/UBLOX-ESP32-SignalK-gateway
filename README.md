@@ -11,7 +11,7 @@
 
 ESP32-based GNSS gateway reading position, speed over ground, and course over ground from a [UBLOX MAX-M10S](https://www.u-blox.com/en/product/max-m10-series) module. Sends navigation data to a [SignalK](https://signalk.org) server via WebSocket/JSON and to other ESP32 devices via ESP-NOW broadcast. Magnetic variation is computed from GPS position and date using the WMM_Tinier geomagnetic model.
 
-OTA firmware updates are enabled. NVS persistence and the web UI skeletons reserved for future usage.
+OTA firmware updates are enabled. A `/status` debug endpoint is available at `http://<device-ip>/status` when `WEB_UI_ENABLED = true`. NVS persistence and the full web UI configuration interface reserved for future usage.
 
 Developed and tested on:
 - [Wemos D1 R32 ESP32 development board](https://partco.fi/tuote/arduino-esp32-kehityskortti-esp-wroom-32-2526)
@@ -82,7 +82,7 @@ Class diagram including the companion projects:
 - Owns: `WebServer`
 - Uses: `UBLOXProcessor`, `UBLOXPreferences`, `SignalKBroker`, `DisplayManager`
 - Owned by: `UBLOXApplication`
-- Responsible for: HTTP web user interface with session authentication
+- Responsible for: HTTP web server; `/status` debug endpoint; full configuration UI reserved for future release
 
 **`UBLOXApplication`:**
 - Owns: `UBLOXSensor`, `UBLOXProcessor`, `UBLOXPreferences`, `SignalKBroker`, `ESPNowBroker`, `DisplayManager`, `WebUIManager`
@@ -115,7 +115,7 @@ ws://<server>:<port>/signalk/v1/stream?token=<optional>
 | `navigation.speedOverGround` | m/s | Deadband 0.025 m/s (~0.05 kn) |
 | `navigation.courseOverGroundTrue` | radians | Deadband 0.1°; only when SOG ≥ 0.2 m/s |
 | `navigation.magneticVariation` | radians | Deadband 0.1°; heartbeat every 0.5 s; computed via WMM_Tinier |
-| `navigation.gnss.satellites` | integer | Sent with every transmission; no separate deadband |
+| `navigation.gnss.satellites` | integer | Sent with every transmission; also triggers independently when count changes |
 | `navigation.gnss.type` | string | Constant `"Combined GPS+GLONASS"` (MAX-M10S is multi-constellation) |
 | `navigation.gnss.methodQuality` | string | Maps UBX fix_type: `"no GPS"` / `"Estimated (DR) mode"` / `"GNSS Fix"` |
 
@@ -159,6 +159,25 @@ LCD is auto-detected at startup — device boots normally if no display is conne
 - Auto-reconnect on dropped connection
 - ArduinoOTA enabled immediately after WiFi connects; hostname is set to the SignalK source name
 - Without WiFi the device still broadcasts via ESP-NOW at full rate
+- Serial diagnostics every ~30 s: free heap, minimum heap since boot, stack watermark, magnetic variation; reset reason (watchdog, panic, brownout, etc.) logged at boot
+
+### Web UI
+
+Available at `http://<device-ip>/status` — no authentication required:
+
+| Field | Description |
+|---|---|
+| Version | Firmware version |
+| Uptime | Seconds since boot |
+| Free heap | Current free heap in bytes |
+| Min heap | Minimum free heap since boot — useful for detecting memory leaks |
+| Stack WM | Main task stack watermark in bytes |
+| GNSS | Fix status, satellite count, position, SOG, COG(T), magnetic variation |
+| SignalK | WebSocket connection state |
+
+Page auto-refreshes every 5 seconds. Full configuration UI reserved for future release.
+
+Set `WEB_UI_ENABLED = false` in `UBLOXApplication.h` to disable the HTTP server entirely in production without removing the implementation.
 
 ## Project structure
 
@@ -176,7 +195,7 @@ LCD is auto-detected at startup — device boots normally if no display is conne
 | `SignalKBroker.h / .cpp` | Class `SignalKBroker` — WebSocket delta transmission |
 | `ESPNowBroker.h / .cpp` | Class `ESPNowBroker` — ESP-NOW broadcast |
 | `DisplayManager.h / .cpp` | Class `DisplayManager` — LCD 16x2 display |
-| `WebUIManager.h / .cpp` | Class `WebUIManager` — HTTP web UI with session authentication |
+| `WebUIManager.h / .cpp` | Class `WebUIManager` — HTTP web server; `/status` debug endpoint |
 | `UBLOXApplication.h / .cpp` | Class `UBLOXApplication` — top-level orchestrator |
 
 ## Hardware
@@ -242,6 +261,7 @@ LCD is auto-detected at startup — device boots normally if no display is conne
 
 1. **HTTP only (no HTTPS)**
    - Use only on private, trusted networks
+   - The `/status` endpoint has no authentication — keep the device on a private network
 
 2. **LAN deployment only**
    - Do NOT expose to public internet

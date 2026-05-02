@@ -38,6 +38,9 @@ private:
     static constexpr uint8_t I2C_SDA = 21;
     static constexpr uint8_t I2C_SCL = 22;
 
+    // Feature flags
+    static constexpr bool WEB_UI_ENABLED = true;
+
     // Timing constants
     static constexpr unsigned long READ_MS               = 167;    // ~6 Hz
     static constexpr unsigned long MIN_TX_INTERVAL_MS    = 199;    // ~5 Hz SignalK

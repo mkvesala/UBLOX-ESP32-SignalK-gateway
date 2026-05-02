@@ -143,7 +143,7 @@ void UBLOXApplication::initWifiServices() {
     ArduinoOTA.setPassword(OTA_PASS);
     ArduinoOTA.begin();
 
-    _webui.begin();
+    if (WEB_UI_ENABLED) _webui.begin();
 }
 
 // OTA update handler — requires WiFi
@@ -154,6 +154,7 @@ void UBLOXApplication::handleOTA() {
 
 // Web UI handler — requires WiFi
 void UBLOXApplication::handleWebUI() {
+    if (!WEB_UI_ENABLED) return;
     if (_wifi_state != WifiState::CONNECTED) return;
     _webui.handleRequest();
 }

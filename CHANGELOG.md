@@ -48,15 +48,21 @@ data to both a SignalK server and the ESP-NOW network.
 
 **Web UI**
 - HTTP server on port 80
-- Session-based authentication (SHA256 password, 128-bit random token)
-- Per-IP login rate limiting
 - OTA updates (ArduinoOTA, password protected)
-- `/status` JSON endpoint: position, SOG, COG, satellites, declination, heap, version
+- `/status` HTML endpoint (no auth): uptime, free heap, min heap since boot, stack watermark, GNSS data, SignalK connection state; auto-refreshes every 5 s
+- `WEB_UI_ENABLED` compile-time flag in `UBLOXApplication.h` — set to `false` to disable the HTTP server entirely without removing the implementation
+- Session-based authentication and full configuration UI reserved for future release
 
 **Other**
 - NVS settings (UBLOXPreferences): configuration persisted to ESP32 flash
 - LCD display (I2C, LiquidCrystal_I2C): shows status, position, and diagnostics
 - WiFi state machine with automatic reconnection
 - `WIFI_AP_STA` mode enables concurrent ESP-NOW and WiFi-STA operation
+- Serial diagnostics every ~30 s: free heap, min heap since boot, stack watermark, magnetic variation; reset reason logged at boot
+
+### Fixed
+
+- **`initWifiServices()` called on every WiFi reconnect** — `ArduinoOTA.begin()` and `SignalKBroker::begin()` were invoked again on each WiFi reconnect, which can destabilise OTA and cause double WebSocket connect attempts; added `_wifi_services_started` guard so they run only once
+- **`navigation.gnss.satellites` and `navigation.gnss.methodQuality` not updating when stationary** — these fields were only transmitted when position/SOG/COG/magvar triggered a send; added `ch_sat` deadband tracking so a change in satellite count or fix type independently triggers transmission
 
 [1.0.0]: https://github.com/mkvesala/UBLOX-ESP32-SignalK-gateway/releases/tag/v1.0.0
