@@ -11,12 +11,12 @@ namespace ESPNow {
 
     // Message types (extend as new sensors are added)
     enum class ESPNowMsgType : uint8_t {
-        HEADING_DELTA   = 1,
-        BATTERY_DELTA   = 2,
-        WEATHER_DELTA   = 3,
-        GNSS_DELTA      = 4,
-        LEVEL_COMMAND   = 10,
-        LEVEL_RESPONSE  = 11,
+        HEADING_DELTA        = 1,
+        BATTERY_DELTA        = 2,
+        WEATHER_DELTA        = 3,
+        GNSS_DELTA           = 4,
+        HALMET_ENGINE_DELTA  = 5,
+        HALMET_TANK_DELTA    = 6,
     };
 
     // === H E A D E R ===
@@ -74,19 +74,16 @@ namespace ESPNow {
         uint8_t reserved;     // padding
     };  // 24 bytes
 
-    // Level command (CrowPanel → Compass, broadcast)
-    // Sent to CMPS14-ESP32-SignalK-gateway
-    struct LevelCommand {
-        uint8_t magic[4];     // "LVLC" — redundant in Phase 2 (msg_type identifies the packet)
-        uint8_t reserved[4];
+    // Engine data
+    // Sent by HALMET-ESP32-SignalK-gateway
+    struct HALMETEngineDelta {
+        float exhaust_temp_k;    // propulsion.0.exhaustTemperature [K]
     };
 
-    // Level response (Compass → CrowPanel, unicast)
-    // Sent by CMPS14-ESP32-SignalK-gateway
-    struct LevelResponse {
-        uint8_t magic[4];     // "LVLR" — redundant in Phase 2 (msg_type identifies the packet)
-        uint8_t success;      // 1 = OK, 0 = failed
-        uint8_t reserved[3];
+    // Tank data
+    // Sent by HALMET-ESP32-SignalK-gateway
+    struct HALMETTankDelta {
+        float fuel_level_ratio;  // tanks.fuel.0.currentLevel [0.0..1.0]
     };
 
     // === W R A P P E R ===
@@ -178,18 +175,9 @@ namespace ESPNow {
         constexpr float MS_TO_KNOTS_X10 = 1.94384f * 10.0f;
 
         // COG: 0–2π → 0–3599
-        // Guard NaN: cog_true_rad is NaN when vessel is stationary (COG undefined at low speed).
-        // Casting NaN to uint16_t is undefined behavior (produces 0xFFFF = 65535 on ESP32 →
-        // getCogDeg() = 6553). Treat NaN COG as no valid fix so the UI shows "---°".
-        if (!isnan(delta.cog_true_rad)) {
-            data.cog_true_x10 = (uint16_t)(delta.cog_true_rad * RAD_TO_DEG_X10);
-            data.fix_ok       = delta.fix_ok;
-        } else {
-            data.cog_true_x10 = 0;
-            data.fix_ok       = 0;
-        }
-
-        data.sog_knots_x10 = isnan(delta.sog_ms) ? 0 : (uint16_t)(delta.sog_ms * MS_TO_KNOTS_X10);
+        data.cog_true_x10  = (uint16_t)(delta.cog_true_rad * RAD_TO_DEG_X10);
+        data.sog_knots_x10 = (uint16_t)(delta.sog_ms * MS_TO_KNOTS_X10);
+        data.fix_ok        = delta.fix_ok;
 
         return data;
     }
