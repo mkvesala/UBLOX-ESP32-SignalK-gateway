@@ -4,7 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.0] - 2026-04-19
+## [1.0.1] - 2026-05-07
+
+### Changed
+- Updated `POS_HEARTBEAT_MS` constant of `ESPNowBroker` to 499 ms and of `SignalKBroker` to 503 ms.
+- Updated `WIFI_STATUS_CHECK_MS` constant of `UBLOXApplication` to 491 ms
+- Commented out all Serial outputs in the project
+
+## [1.0.0] - 2026-05-07
 
 First working release. Reads UBLOX MAX-M10S GNSS module and forwards navigation
 data to both a SignalK server and the ESP-NOW network.
@@ -65,4 +72,5 @@ data to both a SignalK server and the ESP-NOW network.
 - **`initWifiServices()` called on every WiFi reconnect** — `ArduinoOTA.begin()` and `SignalKBroker::begin()` were invoked again on each WiFi reconnect, which can destabilise OTA and cause double WebSocket connect attempts; added `_wifi_services_started` guard so they run only once
 - **`navigation.gnss.satellites` and `navigation.gnss.methodQuality` not updating when stationary** — these fields were only transmitted when position/SOG/COG/magvar triggered a send; added `ch_sat` deadband tracking so a change in satellite count or fix type independently triggers transmission
 
+[1.0.1]: https://github.com/mkvesala/UBLOX-ESP32-SignalK-gateway/releases/tag/v1.0.1
 [1.0.0]: https://github.com/mkvesala/UBLOX-ESP32-SignalK-gateway/releases/tag/v1.0.0
