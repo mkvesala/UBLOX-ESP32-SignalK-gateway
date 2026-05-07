@@ -17,11 +17,11 @@ Developed and tested on:
 - [Wemos D1 R32 ESP32 development board](https://partco.fi/tuote/arduino-esp32-kehityskortti-esp-wroom-32-2526)
 - [ESP32 board package](https://github.com/espressif/arduino-esp32) (3.3.8)
 - [Arduino IDE](https://www.arduino.cc/en/software/) (2.3.8)
-- SignalK Server (2.24.0)
+- SignalK Server (2.26.0)
 - [SparkFun GNSS Receiver Breakout MAX-M10S](https://www.sparkfun.com/sparkfun-gnss-receiver-breakout-max-m10s-qwiic.html)
 
 Integrated via ESP-NOW with:
-- [ESP32-Crowpanel-compass](https://github.com/mkvesala/ESP32-Crowpanel-compass) (v3.2.1)
+- [ESP32-Crowpanel-compass](https://github.com/mkvesala/ESP32-Crowpanel-compass) (v4.0.0)
 
 ## Purpose of the project
 
