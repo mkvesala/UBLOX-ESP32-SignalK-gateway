@@ -45,7 +45,7 @@ private:
     static constexpr unsigned long READ_MS               = 167;    // ~6 Hz
     static constexpr unsigned long MIN_TX_INTERVAL_MS    = 199;    // ~5 Hz SignalK
     static constexpr unsigned long ESPNOW_TX_INTERVAL_MS = 211;    // ~5 Hz ESP-NOW
-    static constexpr unsigned long WIFI_STATUS_CHECK_MS  = 503;
+    static constexpr unsigned long WIFI_STATUS_CHECK_MS  = 491;
     static constexpr unsigned long WIFI_TIMEOUT_MS       = 179999; // ~3 mins
     static constexpr unsigned long WS_RETRY_MS           = 1999;
     static constexpr unsigned long WS_RETRY_MAX_MS       = 119993; // ~2 mins
