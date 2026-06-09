@@ -91,5 +91,6 @@ private:
     void handleAPIntruder();
 
     void initWifiServices();
-    
+    void applyStaticIP();
+
 };

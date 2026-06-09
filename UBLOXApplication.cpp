@@ -55,6 +55,7 @@ void UBLOXApplication::begin() {
     }, ARDUINO_EVENT_WIFI_AP_STACONNECTED);
 
     WiFi.setSleep(false);
+    this->applyStaticIP();   // fixed address — no dependency on DHCP lease
     WiFi.begin(WIFI_SSID, WIFI_PASS);
     _wifi_state = WifiState::CONNECTING;
     _wifi_conn_start_ms = millis();
@@ -98,7 +99,8 @@ void UBLOXApplication::handleWifi(unsigned long now) {
                 // Serial.printf("[WIFI] Connected — IP %s\n", WiFi.localIP().toString().c_str());
                 _display.showInfoMessage("WiFi OK", WiFi.localIP().toString().c_str());
                 this->initWifiServices();
-                _expn_retry_ms = WS_RETRY_MS;
+                _expn_retry_ms  = WS_RETRY_MS;
+                _next_ws_try_ms = now;   // drop stale backoff timestamp
             } else if ((long)(now - _wifi_conn_start_ms) >= (long)WIFI_TIMEOUT_MS) {
                 _wifi_state = WifiState::OFF;
                 WiFi.disconnect(true);
@@ -115,15 +117,20 @@ void UBLOXApplication::handleWifi(unsigned long now) {
             break;
         }
 
-        case WifiState::CONNECTED:
+        case WifiState::CONNECTED: {
             if (!WiFi.isConnected()) {
+                _signalk.closeWebsocket();
                 _wifi_state = WifiState::CONNECTING;
-                WiFi.disconnect();
+                WiFi.disconnect(true);   // wifioff=true: clean STA teardown, AP stays up
+                delay(200);              // let radio settle
+                WiFi.setSleep(false);    // reapply — STA teardown resets this
+                this->applyStaticIP();   // static config lost on STA teardown
                 WiFi.begin(WIFI_SSID, WIFI_PASS);
                 _wifi_conn_start_ms = now;
                 // Serial.println("[WIFI] Lost — reconnecting...");
             }
             break;
+        }
 
         case WifiState::FAILED:
         case WifiState::DISCONNECTED:
@@ -146,6 +153,15 @@ void UBLOXApplication::initWifiServices() {
     if (WEB_UI_ENABLED) _webui.begin();
 }
 
+// Apply fixed IP — must be called before WiFi.begin() and after each STA teardown
+void UBLOXApplication::applyStaticIP() {
+    IPAddress ip, gateway, subnet;
+    ip.fromString(WIFI_STATIC_IP);
+    gateway.fromString(WIFI_GATEWAY);
+    subnet.fromString(WIFI_SUBNET);
+    WiFi.config(ip, gateway, subnet, gateway);  // gateway doubles as DNS
+}
+
 // OTA update handler — requires WiFi
 void UBLOXApplication::handleOTA() {
     if (_wifi_state != WifiState::CONNECTED) return;
@@ -164,12 +180,13 @@ void UBLOXApplication::handleWebsocket(unsigned long now) {
     if (_wifi_state != WifiState::CONNECTED) return;
     _signalk.handleStatus();
 
-    if (!_signalk.isOpen() && (long)(now - _next_ws_try_ms) >= 0) {
+    if (_signalk.isOpen()) {
+        _expn_retry_ms = WS_RETRY_MS;
+    } else if ((long)(now - _next_ws_try_ms) >= 0) {
         _signalk.connectWebsocket();
         _next_ws_try_ms = now + _expn_retry_ms;
         _expn_retry_ms  = min(_expn_retry_ms * 2, WS_RETRY_MAX_MS);
     }
-    if (_signalk.isOpen()) _expn_retry_ms = WS_RETRY_MS;
 }
 
 // Read GNSS sensor at ~6 Hz
