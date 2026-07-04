@@ -49,11 +49,13 @@ private:
     static constexpr unsigned long WIFI_TIMEOUT_MS       = 179999; // ~3 mins
     static constexpr unsigned long WS_RETRY_MS           = 1999;
     static constexpr unsigned long WS_RETRY_MAX_MS       = 119993; // ~2 mins
+    static constexpr unsigned long WS_PING_MS            = 9973;   // ~10 s client ping cadence
     static constexpr unsigned long DIAG_INTERVAL_MS      = 30013;  // ~30 s
 
     // Timers
     unsigned long _expn_retry_ms      = WS_RETRY_MS;
     unsigned long _next_ws_try_ms     = 0;
+    unsigned long _last_ping_ms       = 0;
     unsigned long _last_tx_ms         = 0;
     unsigned long _last_read_ms       = 0;
     unsigned long _wifi_conn_start_ms = 0;
