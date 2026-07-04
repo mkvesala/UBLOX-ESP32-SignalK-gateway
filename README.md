@@ -35,7 +35,8 @@ This is one of my individual digital boat projects. Use at your own risk. Not fo
 
 | Release | Branch | Comment |
 |---------|--------|---------|
-| v1.0.1 | main | Latest release. Adjusting timers and removed Serial outputs. See CHANGELOG for details. |
+| v1.1.0 | main | Latest release. WebSocket ping/pong liveness with graceful reconnect, hardened WiFi reconnect, and static IP (default). See CHANGELOG for details. |
+| v1.0.1 | main | Adjusting timers and removed Serial outputs. See CHANGELOG for details. |
 | v1.0.0 | main | Initial release. GNSS reading, WMM magnetic variation, SignalK WebSocket, ESP-NOW broadcast, AP intrusion detection, LCD display. |
 
 ## Classes
@@ -123,6 +124,8 @@ ws://<server>:<port>/signalk/v1/stream?token=<optional>
 Source name is auto-derived from the device MAC address: `esp32.ublox-XXYYZZ`.
 
 WebSocket reconnects automatically with exponential back-off starting at ~2 s, doubling on each failed attempt up to a ceiling of ~120 s, and resetting to the initial interval when the connection is restored.
+
+A ping/pong liveness probe guards against half-open connections — where the socket still reports open but no data flows (e.g. the SignalK server frozen by host power-save). While the socket is open the gateway sends a client ping every ~10 s; if no server pong is received within ~30 s the connection is declared stale, closed, and re-established through the same back-off path — no reboot required.
 
 ### ESP-NOW communication
 

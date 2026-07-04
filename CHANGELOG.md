@@ -4,6 +4,29 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-07-04
+
+### Added
+- **WebSocket liveness (ping/pong) + graceful reconnect** — `SignalKBroker` now
+  detects a half-open TCP connection where the socket still reports open but no
+  data flows (e.g. macOS power-save freezing the SignalK server). While the
+  socket is open, `UBLOXApplication` sends a client ping every ~10 s
+  (`WS_PING_MS`); `SignalKBroker` records each server pong and exposes
+  `isStale(now)` (no pong within `PONG_TIMEOUT_MS`, ~30 s). A stale socket is
+  closed and re-established through the existing exponential-backoff path — no
+  `ESP.restart()`. New `SignalKBroker::ping()` / `SignalKBroker::isStale()`.
+- **Static IP option (default)** — `applyStaticIP()` configures a fixed address
+  from `secrets.h` (`WIFI_STATIC_IP` / `WIFI_GATEWAY` / `WIFI_SUBNET`), removing
+  the dependency on the router's DHCP lease.
+
+### Changed
+- **Hardened WiFi reconnect** — on link loss the `WifiState::CONNECTED` branch now
+  closes the websocket, does a clean STA teardown (`WiFi.disconnect(true)`),
+  reapplies `setSleep(false)` and the static IP, then reconnects. Recovers from
+  the macOS power-save network freeze that previously required a manual reboot.
+  The `CONNECTING → CONNECTED` transition also resets `_next_ws_try_ms` so the
+  websocket reconnects immediately after WiFi recovers.
+
 ## [1.0.1] - 2026-05-07
 
 ### Changed
