@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2026-07-16
+
+### Changed
+- **WebSocket client recreated on every reconnect** — `SignalKBroker` now owns the
+  `WebsocketsClient` via `std::unique_ptr` and builds a fresh instance in
+  `connectWebsocket()` (registering callbacks before `connect()`), destroying it in
+  `closeWebsocket()` (`_ws.reset()`). This runs the `WiFiClient` destructor and frees
+  the underlying lwIP socket fd, guaranteeing a clean transport on every attempt.
+  Fixes a rare lock-up where, after ~12–48 h, the SignalK connection could not be
+  re-established without a manual reboot even though WiFi, heap and the main loop were
+  healthy — a stuck/leaked socket was inherited by every subsequent `connect()`.
+  All teardown paths (including the `sendDelta()` send-failure) now funnel through
+  `closeWebsocket()`. Public API and reconnect/backoff/ping-pong logic are unchanged.
+
 ## [1.1.0] - 2026-07-04
 
 ### Added

@@ -35,7 +35,8 @@ This is one of my individual digital boat projects. Use at your own risk. Not fo
 
 | Release | Branch | Comment |
 |---------|--------|---------|
-| v1.1.0 | main | Latest release. WebSocket ping/pong liveness with graceful reconnect, hardened WiFi reconnect, and static IP (default). See CHANGELOG for details. |
+| v1.1.1 | main | Latest release. WebSocket client recreated per reconnect (`std::unique_ptr`) so a stuck lwIP socket is never inherited. See CHANGELOG for details. |
+| v1.1.0 | main | WebSocket ping/pong liveness with graceful reconnect, hardened WiFi reconnect, and static IP (default). See CHANGELOG for details. |
 | v1.0.1 | main | Adjusting timers and removed Serial outputs. See CHANGELOG for details. |
 | v1.0.0 | main | Initial release. GNSS reading, WMM magnetic variation, SignalK WebSocket, ESP-NOW broadcast, AP intrusion detection, LCD display. |
 
@@ -64,7 +65,7 @@ Class diagram including the companion projects:
 - Responsible for: loading and saving configuration to ESP32 NVS
 
 **`SignalKBroker`:**
-- Owns: `WebsocketsClient`
+- Owns: `WebsocketsClient` (via `std::unique_ptr`, recreated per reconnect)
 - Uses: `UBLOXProcessor`
 - Owned by: `UBLOXApplication`
 - Responsible for: WebSocket connection and delta transmission to SignalK server
@@ -126,6 +127,8 @@ Source name is auto-derived from the device MAC address: `esp32.ublox-XXYYZZ`.
 WebSocket reconnects automatically with exponential back-off starting at ~2 s, doubling on each failed attempt up to a ceiling of ~120 s, and resetting to the initial interval when the connection is restored.
 
 A ping/pong liveness probe guards against half-open connections — where the socket still reports open but no data flows (e.g. the SignalK server frozen by host power-save). While the socket is open the gateway sends a client ping every ~10 s; if no server pong is received within ~30 s the connection is declared stale, closed, and re-established through the same back-off path — no reboot required.
+
+Each reconnect builds a fresh `WebsocketsClient` and the previous one is destroyed on teardown, freeing its underlying lwIP socket. This guarantees a clean transport on every attempt, so a socket that has become stuck in an unrecoverable state is never inherited by a later `connect()`.
 
 ### ESP-NOW communication
 

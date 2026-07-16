@@ -4,6 +4,7 @@
 #include <ArduinoWebsockets.h>
 #include <ArduinoJson.h>
 #include <esp_mac.h>
+#include <memory>
 #include "UBLOXProcessor.h"
 #include "helpers.h"
 
@@ -42,7 +43,7 @@ public:
 private:
 
     UBLOXProcessor &_processor;
-    websockets::WebsocketsClient _ws;
+    std::unique_ptr<websockets::WebsocketsClient> _ws;
 
     // Reusable JSON document — position obj + 5 value paths
     StaticJsonDocument<768> _delta_doc;

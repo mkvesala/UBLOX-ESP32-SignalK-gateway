@@ -19,31 +19,39 @@ bool SignalKBroker::begin() {
 
 // Poll websocket to keep connection alive — call from loop()
 void SignalKBroker::handleStatus() {
-    if (_ws_open) _ws.poll();
+    if (_ws_open && _ws) _ws->poll();
 }
 
 // Connect to SignalK server and register callbacks
 bool SignalKBroker::connectWebsocket() {
-    _ws_open = _ws.connect(_sk_url);
+    // Fresh client per attempt — a stuck lwIP socket is never inherited
+    _ws = std::make_unique<WebsocketsClient>();
+    _ws->onEvent([this](WebsocketsEvent event, const String &data) {
+        (void)data;
+        this->onEventCallback(event);
+    });
+    _ws_open = _ws->connect(_sk_url);
     if (_ws_open) {
         _last_pong_ms = millis();   // seed liveness so a fresh socket is not flagged stale
-        _ws.onEvent([this](WebsocketsEvent event, const String &data) {
-            this->onEventCallback(event);
-        });
+    } else {
+        _ws.reset();                // destroy failed client → free the socket fd
     }
     return _ws_open;
 }
 
 // Close websocket (used from restart handler)
 void SignalKBroker::closeWebsocket() {
-    _ws.close();
+    if (_ws) {
+        _ws->close();
+        _ws.reset();               // destroy client → WiFiClient dtor frees lwIP socket fd
+    }
     _ws_open = false;
     _last_pong_ms = 0;
 }
 
 // Send a client-initiated ping frame to probe liveness
 void SignalKBroker::ping() {
-    if (_ws_open) _ws.ping();
+    if (_ws_open && _ws) _ws->ping();
 }
 
 // Half-open detection: open, has been connected, but no pong within timeout
@@ -130,10 +138,9 @@ void SignalKBroker::sendDelta() {
 
     char buf[768];
     size_t n = serializeJson(_delta_doc, buf, sizeof(buf));
-    bool ok = _ws.send(buf, n);
+    bool ok = _ws->send(buf, n);
     if (!ok) {
-        _ws.close();
-        _ws_open = false;
+        this->closeWebsocket();   // destroy the client; backoff loop reconnects fresh
     }
 }
 
@@ -178,7 +185,7 @@ void SignalKBroker::onEventCallback(WebsocketsEvent event) {
             _ws_open = false;
             break;
         case WebsocketsEvent::GotPing:
-            _ws.pong();
+            if (_ws) _ws->pong();
             break;
         case WebsocketsEvent::GotPong:
             _last_pong_ms = millis();
