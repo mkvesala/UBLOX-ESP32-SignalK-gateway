@@ -35,7 +35,7 @@ This is one of my individual digital boat projects. Use at your own risk. Not fo
 
 | Release | Branch | Comment |
 |---------|--------|---------|
-| v1.1.1 | main | Latest release. WebSocket client recreated per reconnect (`std::unique_ptr`) so a stuck lwIP socket is never inherited. See CHANGELOG for details. |
+| v1.2. | main | Latest release. WebSocket client recreated per reconnect (`std::unique_ptr`) so a stuck lwIP socket is never inherited. See CHANGELOG for details. |
 | v1.1.0 | main | WebSocket ping/pong liveness with graceful reconnect, hardened WiFi reconnect, and static IP (default). See CHANGELOG for details. |
 | v1.0.1 | main | Adjusting timers and removed Serial outputs. See CHANGELOG for details. |
 | v1.0.0 | main | Initial release. GNSS reading, WMM magnetic variation, SignalK WebSocket, ESP-NOW broadcast, AP intrusion detection, LCD display. |

@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.1.1] - 2026-07-16
+## [1.2.0] - 2026-07-16
 
 ### Changed
 - **WebSocket client recreated on every reconnect** — `SignalKBroker` now owns the
@@ -109,5 +109,7 @@ data to both a SignalK server and the ESP-NOW network.
 - **`initWifiServices()` called on every WiFi reconnect** — `ArduinoOTA.begin()` and `SignalKBroker::begin()` were invoked again on each WiFi reconnect, which can destabilise OTA and cause double WebSocket connect attempts; added `_wifi_services_started` guard so they run only once
 - **`navigation.gnss.satellites` and `navigation.gnss.methodQuality` not updating when stationary** — these fields were only transmitted when position/SOG/COG/magvar triggered a send; added `ch_sat` deadband tracking so a change in satellite count or fix type independently triggers transmission
 
+[1.2.0]: https://github.com/mkvesala/UBLOX-ESP32-SignalK-gateway/releases/tag/v1.2.0
+[1.1.0]: https://github.com/mkvesala/UBLOX-ESP32-SignalK-gateway/releases/tag/v1.1.0
 [1.0.1]: https://github.com/mkvesala/UBLOX-ESP32-SignalK-gateway/releases/tag/v1.0.1
 [1.0.0]: https://github.com/mkvesala/UBLOX-ESP32-SignalK-gateway/releases/tag/v1.0.0
