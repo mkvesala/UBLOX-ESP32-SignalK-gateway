@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] - 2026-07-29
+
+### Changed
+- **Shared `espnow_protocol.h` updated to the fleet-wide superset** — adds the
+  `HALMET_WATER_DELTA` (7) and `DEPTH_DELTA` (8) message types with their payload
+  structs, and documents the shared-header ownership rules together with the
+  fleet-wide `msg_type` allocation. No existing enum value or payload struct was
+  modified, so the wire format is unchanged and every existing receiver stays
+  compatible. This gateway's own firmware logic is untouched.
+
+### Fixed
+- **Position and SOG hidden at anchor on ESP-NOW receivers** — the receiver-side
+  `convertGnssDeltaToData()` folded a NaN COG into `fix_ok`, so a stationary boat —
+  which has a valid position fix but an undefined course — appeared to have no fix at
+  all and the display suppressed position and SOG, exactly the anchored-glance case
+  the watch exists for. `GnssData` now tracks position validity (`fix_ok`) and course
+  validity (`cog_valid`) separately, exposed as `hasFix()` / `hasCog()`, and carries
+  `lat_deg` / `lon_deg` for the receiver's position display. Receiver-side only — the
+  data this gateway transmits is unchanged.
+
 ## [1.2.0] - 2026-07-16
 
 ### Changed
@@ -109,6 +129,7 @@ data to both a SignalK server and the ESP-NOW network.
 - **`initWifiServices()` called on every WiFi reconnect** — `ArduinoOTA.begin()` and `SignalKBroker::begin()` were invoked again on each WiFi reconnect, which can destabilise OTA and cause double WebSocket connect attempts; added `_wifi_services_started` guard so they run only once
 - **`navigation.gnss.satellites` and `navigation.gnss.methodQuality` not updating when stationary** — these fields were only transmitted when position/SOG/COG/magvar triggered a send; added `ch_sat` deadband tracking so a change in satellite count or fix type independently triggers transmission
 
+[1.2.1]: https://github.com/mkvesala/UBLOX-ESP32-SignalK-gateway/releases/tag/v1.2.1
 [1.2.0]: https://github.com/mkvesala/UBLOX-ESP32-SignalK-gateway/releases/tag/v1.2.0
 [1.1.0]: https://github.com/mkvesala/UBLOX-ESP32-SignalK-gateway/releases/tag/v1.1.0
 [1.0.1]: https://github.com/mkvesala/UBLOX-ESP32-SignalK-gateway/releases/tag/v1.0.1

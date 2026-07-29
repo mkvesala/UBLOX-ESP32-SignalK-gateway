@@ -35,7 +35,8 @@ This is one of my individual digital boat projects. Use at your own risk. Not fo
 
 | Release | Branch | Comment |
 |---------|--------|---------|
-| v1.2. | main | Latest release. WebSocket client recreated per reconnect (`std::unique_ptr`) so a stuck lwIP socket is never inherited. See CHANGELOG for details. |
+| v1.2.1 | main | Latest release. Updated the superset version of shared espnow_protocol.h header to this project. |
+| v1.2.0 | main | WebSocket client recreated per reconnect (`std::unique_ptr`) so a stuck lwIP socket is never inherited. See CHANGELOG for details. |
 | v1.1.0 | main | WebSocket ping/pong liveness with graceful reconnect, hardened WiFi reconnect, and static IP (default). See CHANGELOG for details. |
 | v1.0.1 | main | Adjusting timers and removed Serial outputs. See CHANGELOG for details. |
 | v1.0.0 | main | Initial release. GNSS reading, WMM magnetic variation, SignalK WebSocket, ESP-NOW broadcast, AP intrusion detection, LCD display. |
@@ -138,8 +139,12 @@ Broadcasts GNSS data via ESP-NOW for other ESP32 devices, such as external displ
 - `GnssDelta` struct (24 bytes) containing:
   - `lat_deg`, `lon_deg` — position in decimal degrees
   - `sog_ms` — speed over ground in m/s
-  - `cog_true_rad` — COG true in radians
-  - `mag_var_rad` — magnetic variation in radians
+  - `cog_true_rad` — COG true in radians, `NAN` when stationary (course undefined)
+  - `mag_var_rad` — magnetic variation in radians, `NAN` until the first fix
+  - `satellites` — satellites in view
+  - `fix_type` — 0 = no fix, 3 = 3D, 4 = GNSS + dead reckoning
+  - `fix_ok` — 1 when the position fix is valid; independent of `cog_true_rad`
+  - `reserved` — padding to a 4-byte boundary
 
 **Broadcast mode:** Uses broadcast address (FF:FF:FF:FF:FF:FF) — any ESP-NOW receiver on the same WiFi channel can listen.
 
