@@ -20,9 +20,11 @@ struct RawGnssData {
     int32_t  lon_e7;       // degrees × 10^-7
     int32_t  speed_mms;    // mm/s
     int32_t  heading_e5;   // degrees × 10^-5 (true north referenced)
+    uint32_t unix_utc;     // UTC seconds since 1970-01-01, rounded; 0 = not available
     uint16_t year;         // UTC year (e.g. 2026)
     uint8_t  month;        // UTC month 1–12
     uint8_t  day;          // UTC day   1–31
+    bool     time_valid;   // getConfirmedTime() && getDateValid() && plausible year
     uint8_t  siv;          // satellites in view
     uint8_t  fix_type;     // 0=no fix, 3=3D, 4=GNSS+DR
     bool     fix_ok;       // getGnssFixOk()

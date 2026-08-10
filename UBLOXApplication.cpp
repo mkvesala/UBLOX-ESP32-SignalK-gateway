@@ -77,6 +77,7 @@ void UBLOXApplication::loop() {
     this->handleSensorRead(now);
     this->handleSignalK(now);
     this->handleESPNow(now);
+    this->handleDateTime(now);
     this->handleDisplay();
     this->handleDiag(now);
 }
@@ -217,6 +218,15 @@ void UBLOXApplication::handleESPNow(unsigned long now) {
     if ((long)(now - _last_espnow_tx_ms) < (long)ESPNOW_TX_INTERVAL_MS) return;
     _last_espnow_tx_ms = now;
     _espnow.sendDelta();
+}
+
+// Publish GNSS UTC at ~0.5 Hz — ESP-NOW always, SignalK only when connected.
+// No WiFi guard on the ESP-NOW leg: receivers with no RTC must get their clock offline too.
+void UBLOXApplication::handleDateTime(unsigned long now) {
+    if ((long)(now - _last_datetime_tx_ms) < (long)DATETIME_TX_MS) return;
+    _last_datetime_tx_ms = now;
+    _espnow.sendDateTime();
+    if (_wifi_state == WifiState::CONNECTED) _signalk.sendDateTime();
 }
 
 // Update display — runs every loop iteration (rate-limited inside DisplayManager)

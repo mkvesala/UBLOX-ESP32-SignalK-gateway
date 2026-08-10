@@ -5,6 +5,7 @@
 #include <ArduinoJson.h>
 #include <esp_mac.h>
 #include <memory>
+#include <time.h>
 #include "UBLOXProcessor.h"
 #include "helpers.h"
 
@@ -13,6 +14,7 @@
 // - WebSocket connection to SignalK server
 // - Sends: navigation.position, speedOverGround, courseOverGroundTrue, magneticVariation,
 //          navigation.gnss.satellites, navigation.gnss.type, navigation.gnss.methodQuality
+// - Sends: navigation.datetime as its own delta, independent of the position fix
 // - Owned by: UBLOXApplication
 // - Owns: WebsocketsClient
 // - Uses: UBLOXProcessor
@@ -33,6 +35,7 @@ public:
     bool connectWebsocket();
     void closeWebsocket();
     void sendDelta();
+    void sendDateTime();
 
     bool isOpen() const { return _ws_open; }
     const char* getSignalKSource() const { return _sk_source; }
@@ -47,6 +50,9 @@ private:
 
     // Reusable JSON document — position obj + 5 value paths
     StaticJsonDocument<768> _delta_doc;
+
+    // Separate small document — navigation.datetime is independent of the position delta
+    StaticJsonDocument<384> _dt_doc;
 
     bool _ws_open = false;
     char _sk_url[512] {};

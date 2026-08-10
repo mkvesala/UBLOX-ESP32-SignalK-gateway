@@ -51,6 +51,21 @@ bool UBLOXSensor::read(RawGnssData &out) {
     out.fix_type    = _gnss.getFixType();
     out.fix_ok      = _gnss.getGnssFixOk();
 
+    // UTC epoch — must be read LAST. getUnixEpoch() clears the year/month/day/hour/
+    // min/sec moduleQueried bits, so calling it before the getters above would make
+    // them re-issue a blocking getPVT() with the library default maxWait.
+    // The year >= 2020 guard is mandatory: getUnixEpoch() indexes
+    // SFE_UBLOX_DAYS_SINCE_2020[year - 2020] with no bounds check, so an unfixed
+    // module (year 0) would read out of bounds and return garbage.
+    out.unix_utc   = 0;
+    out.time_valid = false;
+    if (out.year >= 2020 && _gnss.getConfirmedTime(0) && _gnss.getDateValid(0)) {
+        uint32_t us   = 0;
+        uint32_t secs = _gnss.getUnixEpoch(us, 0);
+        out.unix_utc   = (us >= 500000UL) ? secs + 1 : secs;   // round to nearest second
+        out.time_valid = true;
+    }
+
     return true;
 }
 

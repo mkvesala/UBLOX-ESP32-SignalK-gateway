@@ -8,7 +8,7 @@
 
 // === E S P N O W B R O K E R ===
 //
-// - Broadcasts GnssDelta packets to all ESP-NOW peers
+// - Broadcasts GnssDelta and DateTimeDelta packets to all ESP-NOW peers
 // - No receive logic — GPS gateway does not accept commands
 // - Owned by: UBLOXApplication
 // - Uses: UBLOXProcessor
@@ -21,6 +21,7 @@ public:
 
     bool begin();
     void sendDelta();
+    void sendDateTime();
 
 private:
 

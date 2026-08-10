@@ -75,6 +75,27 @@ void ESPNowBroker::sendDelta() {
     if (ch_cog) { _last_cog = d.cog_t_rad; }
 }
 
+// Broadcast DateTimeDelta packet — GNSS UTC for receivers with no RTC and no NTP.
+// Cadence is owned by UBLOXApplication::handleDateTime().
+void ESPNowBroker::sendDateTime() {
+    if (!_initialized) return;
+
+    auto dt = _processor.getDateTime();
+    if (!dt.valid) return;   // never broadcast a fabricated time
+
+    // Assemble ESPNowPacket<DateTimeDelta>
+    ESPNow::ESPNowPacket<ESPNow::DateTimeDelta> pkt;
+    ESPNow::initHeader(pkt.hdr, ESPNow::ESPNowMsgType::DATETIME_DELTA, sizeof(ESPNow::DateTimeDelta));
+
+    pkt.payload.unix_utc    = dt.unix_utc;
+    pkt.payload.time_valid  = 1;
+    pkt.payload.reserved[0] = 0;
+    pkt.payload.reserved[1] = 0;
+    pkt.payload.reserved[2] = 0;
+
+    esp_now_send(BROADCAST_ADDR, (const uint8_t*)&pkt, sizeof(pkt));
+}
+
 // === S T A T I C ===
 
 void ESPNowBroker::onDataSent(const esp_now_send_info_t* info, esp_now_send_status_t status) {

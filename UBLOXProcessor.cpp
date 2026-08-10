@@ -19,6 +19,7 @@ bool UBLOXProcessor::update() {
     if (!_sensor.read(raw)) return false;
 
     this->updateDelta(raw);
+    this->updateDateTime(raw);
     return true;
 }
 
@@ -62,4 +63,14 @@ void UBLOXProcessor::updateDelta(const RawGnssData &raw) {
     }
 
     _delta.mag_var_rad = _magvar_rad;
+}
+
+// Accept GNSS UTC only when the module confirms it and the epoch is plausible.
+// Sticky like _magvar_rad — a momentary loss of confirmation must not blank a clock
+// that receivers have already synchronised to.
+void UBLOXProcessor::updateDateTime(const RawGnssData &raw) {
+    if (!raw.time_valid || raw.unix_utc < MIN_PLAUSIBLE_EPOCH) return;
+
+    _datetime.unix_utc = raw.unix_utc;
+    _datetime.valid    = true;
 }

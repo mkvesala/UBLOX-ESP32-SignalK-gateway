@@ -144,6 +144,46 @@ void SignalKBroker::sendDelta() {
     }
 }
 
+// Send GNSS UTC to SignalK as navigation.datetime.
+// Format comes from the SignalK schema (schemas/groups/navigation.json): a string in
+// RFC 3339, UTC only without local offset. The schema pattern is ".*Z$", so the
+// trailing Z is mandatory and "+00:00" would be rejected.
+// gnssTimeSource is a sibling property of value in the full model, not a leaf, so it
+// cannot be expressed as a delta path — navigation.gnss.type already carries it.
+void SignalKBroker::sendDateTime() {
+    if (!_ws_open) return;
+
+    auto dt = _processor.getDateTime();
+    if (!dt.valid) return;
+
+    time_t    t = (time_t)dt.unix_utc;
+    struct tm tm_utc;
+    gmtime_r(&t, &tm_utc);
+
+    // char[] rather than const char* — ArduinoJson copies arrays into the document
+    // but only aliases a const char*, which would dangle once this returns
+    char iso[21];
+    strftime(iso, sizeof(iso), "%Y-%m-%dT%H:%M:%SZ", &tm_utc);
+
+    // --- Build JSON delta ---
+    _dt_doc.clear();
+    _dt_doc["context"] = "vessels.self";
+    auto updates = _dt_doc.createNestedArray("updates");
+    auto up = updates.createNestedObject();
+    up["$source"] = _sk_source;
+    auto values = up.createNestedArray("values");
+    auto o = values.createNestedObject();
+    o["path"]  = "navigation.datetime";
+    o["value"] = iso;
+
+    char buf[256];
+    size_t n = serializeJson(_dt_doc, buf, sizeof(buf));
+    bool ok = _ws->send(buf, n);
+    if (!ok) {
+        this->closeWebsocket();   // destroy the client; backoff loop reconnects fresh
+    }
+}
+
 // === P R I V A T E ===
 
 // Map UBX fix_type (0–4) to SignalK navigation.gnss.methodQuality enum value

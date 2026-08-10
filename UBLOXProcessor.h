@@ -12,8 +12,9 @@
 // - begin() initialises sensor and WMM model
 // - update() reads sensor, converts units, computes magnetic variation via WMM
 // - getDelta() returns processed data for brokers
+// - getDateTime() returns confirmed GNSS UTC for brokers
 // - Owned by: UBLOXApplication
-// - Uses: UBLOXSensor, TwoWire, GnssDelta (struct)
+// - Uses: UBLOXSensor, TwoWire, GnssDelta (struct), DateTimeDelta (struct)
 // - Owns: WMM_Tinier
 
 class UBLOXProcessor {
@@ -37,7 +38,16 @@ public:
         bool    fix_ok     = false;
     };
 
-    GnssDelta getDelta() const { return _delta; }
+    // UTC date/time from GNSS — kept apart from GnssDelta because the module can
+    // confirm time while there is no position fix, and updateDelta() NANs GnssDelta
+    // whenever the fix is lost
+    struct DateTimeDelta {
+        uint32_t unix_utc = 0;      // seconds since 1970-01-01 UTC; 0 = unknown
+        bool     valid    = false;  // module reports confirmed UTC date + time
+    };
+
+    GnssDelta     getDelta()    const { return _delta; }
+    DateTimeDelta getDateTime() const { return _datetime; }
 
     // Getters for display and web UI
     float    getLatDeg()     const { return _delta.lat_deg; }
@@ -55,11 +65,16 @@ private:
     WMM_Tinier _wmm;
 
     GnssDelta _delta;
+    DateTimeDelta _datetime;
     float _magvar_rad = NAN;
 
     // COG gating threshold — below this SOG, COG is noise
     static constexpr float COG_SOG_GATE_MS = 0.2f;   // ~0.4 kn
 
+    // 2020-01-01 — below this the u-blox epoch conversion is not meaningful
+    static constexpr uint32_t MIN_PLAUSIBLE_EPOCH = 1577836800UL;
+
     void updateDelta(const RawGnssData &raw);
+    void updateDateTime(const RawGnssData &raw);
 
 };

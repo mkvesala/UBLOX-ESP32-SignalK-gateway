@@ -35,7 +35,8 @@ This is one of my individual digital boat projects. Use at your own risk. Not fo
 
 | Release | Branch | Comment |
 |---------|--------|---------|
-| v1.2.1 | main | Latest release. Updated the superset version of shared espnow_protocol.h header to this project. |
+| v1.3.0 | main | Latest release. GNSS UTC published as ESP-NOW `DATETIME_DELTA` and SignalK `navigation.datetime`. See CHANGELOG for details. |
+| v1.2.1 | main | Updated the superset version of shared espnow_protocol.h header to this project. |
 | v1.2.0 | main | WebSocket client recreated per reconnect (`std::unique_ptr`) so a stuck lwIP socket is never inherited. See CHANGELOG for details. |
 | v1.1.0 | main | WebSocket ping/pong liveness with graceful reconnect, hardened WiFi reconnect, and static IP (default). See CHANGELOG for details. |
 | v1.0.1 | main | Adjusting timers and removed Serial outputs. See CHANGELOG for details. |
@@ -54,10 +55,10 @@ Class diagram including the companion projects:
 - Responsible for: I2C communication with the MAX-M10S module; exposes raw PVT data with no processing
 
 **`UBLOXProcessor`:**
-- Owns: `GnssDelta` (data struct), `WMM_Tinier`
+- Owns: `GnssDelta` and `DateTimeDelta` (data structs), `WMM_Tinier`
 - Uses: `UBLOXSensor`
 - Owned by: `UBLOXApplication`
-- Responsible for: unit conversion, COG gating, magnetic variation computation via WMM model
+- Responsible for: unit conversion, COG gating, magnetic variation computation via WMM model, UTC validity gating
 
 **`UBLOXPreferences`:**
 - Owns: `Preferences`
@@ -74,7 +75,7 @@ Class diagram including the companion projects:
 **`ESPNowBroker`:**
 - Uses: `UBLOXProcessor`
 - Owned by: `UBLOXApplication`
-- Responsible for: ESP-NOW broadcast of GNSS navigation data
+- Responsible for: ESP-NOW broadcast of GNSS navigation data and GNSS UTC
 
 **`DisplayManager`:**
 - Owns: `LiquidCrystal_I2C`
@@ -123,6 +124,14 @@ ws://<server>:<port>/signalk/v1/stream?token=<optional>
 | `navigation.gnss.type` | string | Constant `"Combined GPS+GLONASS"` (MAX-M10S is multi-constellation) |
 | `navigation.gnss.methodQuality` | string | Maps UBX fix_type: `"no GPS"` / `"Estimated (DR) mode"` / `"GNSS Fix"` |
 
+**Also sends** as a separate delta at ~0.5 Hz:
+
+| SignalK path | Unit | Notes |
+|---|---|---|
+| `navigation.datetime` | RFC 3339 (UTC) string | GNSS UTC, e.g. `2026-08-10T13:11:59Z`. Sent independently of the position fix — the module can confirm time before a fix is available |
+
+The datetime format comes from the SignalK schema (`schemas/groups/navigation.json`), not from the prose specification: the value is a string in RFC 3339, UTC only without local offset, and the schema pattern `.*Z$` makes the trailing `Z` mandatory — `+00:00` is not accepted. The schema's `gnssTimeSource` is a sibling property of `value` rather than a leaf, so it cannot be expressed as a delta path; `navigation.gnss.type` already carries the same information.
+
 Source name is auto-derived from the device MAC address: `esp32.ublox-XXYYZZ`.
 
 WebSocket reconnects automatically with exponential back-off starting at ~2 s, doubling on each failed attempt up to a ceiling of ~120 s, and resetting to the initial interval when the connection is restored.
@@ -145,6 +154,14 @@ Broadcasts GNSS data via ESP-NOW for other ESP32 devices, such as external displ
   - `fix_type` — 0 = no fix, 3 = 3D, 4 = GNSS + dead reckoning
   - `fix_ok` — 1 when the position fix is valid; independent of `cog_true_rad`
   - `reserved` — padding to a 4-byte boundary
+
+**Also sends** at ~0.5 Hz, ungated by any deadband:
+- `DateTimeDelta` struct (8 bytes) containing:
+  - `unix_utc` — UTC seconds since 1970-01-01, rounded to the nearest second
+  - `time_valid` — always 1; the packet is simply not sent while the time is unconfirmed
+  - `reserved` — padding to an 8-byte boundary
+
+This lets receivers with neither an RTC nor NTP set their system clock straight from GNSS — ESP32-Crowpanel-SkippersWatch applies it via `settimeofday()`. Broadcasting continues when WiFi is down, so the clock stays correct offline.
 
 **Broadcast mode:** Uses broadcast address (FF:FF:FF:FF:FF:FF) — any ESP-NOW receiver on the same WiFi channel can listen.
 

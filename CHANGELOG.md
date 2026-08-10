@@ -4,6 +4,38 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-08-10
+
+### Added
+- **GNSS UTC published on both transports** — the gateway now fills the
+  `DATETIME_DELTA` (9) slot that `espnow_protocol.h` already reserved for it, and
+  publishes the same UTC to SignalK as `navigation.datetime`. Both go out at ~2 s
+  intervals from a single new `handleDateTime()` handler. The ESP-NOW leg has no WiFi
+  guard, so receivers keep a correct clock while the gateway is offline; the SignalK
+  leg is skipped unless the WebSocket is connected. This lets displays with neither an
+  RTC nor NTP — ESP32-Crowpanel-SkippersWatch's clock page — set their system clock
+  straight from GNSS.
+- **UTC epoch read from the module** — `RawGnssData` gains `unix_utc` and `time_valid`.
+  The epoch is read via `getUnixEpoch()` and rounded to the nearest second using the
+  UBX `nano` field, so a receiver's clock lands within ±0.5 s instead of carrying a
+  systematic 0…−1 s lag. Validity is `getConfirmedTime() && getDateValid()`, exactly
+  as the shared protocol header specifies.
+- **`UBLOXProcessor::DateTimeDelta`** — UTC is kept in its own struct rather than
+  inside `GnssDelta`, because the module can confirm the time before a position fix is
+  available and `updateDelta()` NANs `GnssDelta` whenever the fix is lost. Both brokers
+  therefore keep publishing time through a fix outage. The value is accepted only above
+  a 2020-01-01 epoch floor and is sticky once good, so a momentary loss of confirmation
+  never blanks a clock that receivers have already synchronised to.
+
+### Notes
+- `navigation.datetime` is an RFC 3339 UTC **string** ending in `Z`, per the SignalK
+  JSON schema (`schemas/groups/navigation.json`, pattern `.*Z$`) — the prose
+  specification does not state the format. The schema's `gnssTimeSource` is a sibling
+  of `value` rather than a leaf and so cannot be carried in a delta path; the existing
+  `navigation.gnss.type` conveys the same information.
+- `espnow_protocol.h` is **unchanged** — the enum value and `DateTimeDelta` struct were
+  already present and identical in all fleet projects, so no cross-project copy is due.
+
 ## [1.2.1] - 2026-07-29
 
 ### Changed

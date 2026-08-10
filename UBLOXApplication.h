@@ -51,17 +51,19 @@ private:
     static constexpr unsigned long WS_RETRY_MAX_MS       = 119993; // ~2 mins
     static constexpr unsigned long WS_PING_MS            = 9973;   // ~10 s client ping cadence
     static constexpr unsigned long DIAG_INTERVAL_MS      = 30013;  // ~30 s
+    static constexpr unsigned long DATETIME_TX_MS        = 2003;   // ~2 s UTC to both transports
 
     // Timers
-    unsigned long _expn_retry_ms      = WS_RETRY_MS;
-    unsigned long _next_ws_try_ms     = 0;
-    unsigned long _last_ping_ms       = 0;
-    unsigned long _last_tx_ms         = 0;
-    unsigned long _last_read_ms       = 0;
-    unsigned long _wifi_conn_start_ms = 0;
-    unsigned long _wifi_last_check_ms = 0;
-    unsigned long _last_espnow_tx_ms  = 0;
-    unsigned long _last_diag_ms       = 0;
+    unsigned long _expn_retry_ms       = WS_RETRY_MS;
+    unsigned long _next_ws_try_ms      = 0;
+    unsigned long _last_ping_ms        = 0;
+    unsigned long _last_tx_ms          = 0;
+    unsigned long _last_read_ms        = 0;
+    unsigned long _wifi_conn_start_ms  = 0;
+    unsigned long _wifi_last_check_ms  = 0;
+    unsigned long _last_espnow_tx_ms   = 0;
+    unsigned long _last_diag_ms        = 0;
+    unsigned long _last_datetime_tx_ms = 0;
 
     bool _sensor_ok = false;
     bool _wifi_services_started = false;
@@ -88,6 +90,7 @@ private:
     void handleSensorRead(unsigned long now);
     void handleSignalK(unsigned long now);
     void handleESPNow(unsigned long now);
+    void handleDateTime(unsigned long now);
     void handleDisplay();
     void handleDiag(unsigned long now);
     void handleAPIntruder();
