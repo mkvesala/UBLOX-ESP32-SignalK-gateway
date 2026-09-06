@@ -22,6 +22,7 @@ Developed and tested on:
 
 Integrated via ESP-NOW with:
 - [ESP32-Crowpanel-compass](https://github.com/mkvesala/ESP32-Crowpanel-compass) (v4.0.0)
+- [ESP32-Crowpanel-SkippersWatch](https://github.com/mkvesala/ESP32-Crowpanel-SkippersWatch) (v1.0.0) — disciplines its system clock from `DATETIME_DELTA`
 
 ## Purpose of the project
 
@@ -219,10 +220,10 @@ Set `WEB_UI_ENABLED = false` in `UBLOXApplication.h` to disable the HTTP server 
 | `espnow_protocol.h` | Shared ESP-NOW wire protocol — header, packet template, all payload structs |
 | `helpers.h` | `validf()` float validator, angular difference helper |
 | `UBLOXSensor.h / .cpp` | Class `UBLOXSensor` — raw I2C communication with MAX-M10S |
-| `UBLOXProcessor.h / .cpp` | Class `UBLOXProcessor` — unit conversion, COG gating, WMM magnetic variation |
+| `UBLOXProcessor.h / .cpp` | Class `UBLOXProcessor` — unit conversion, COG gating, WMM magnetic variation, UTC validity gating |
 | `UBLOXPreferences.h / .cpp` | Class `UBLOXPreferences` — NVS configuration storage |
-| `SignalKBroker.h / .cpp` | Class `SignalKBroker` — WebSocket delta transmission |
-| `ESPNowBroker.h / .cpp` | Class `ESPNowBroker` — ESP-NOW broadcast |
+| `SignalKBroker.h / .cpp` | Class `SignalKBroker` — WebSocket delta transmission, including `navigation.datetime` |
+| `ESPNowBroker.h / .cpp` | Class `ESPNowBroker` — ESP-NOW broadcast of `GnssDelta` and `DateTimeDelta` |
 | `DisplayManager.h / .cpp` | Class `DisplayManager` — LCD 16x2 display |
 | `WebUIManager.h / .cpp` | Class `WebUIManager` — HTTP web server; `/status` debug endpoint |
 | `UBLOXApplication.h / .cpp` | Class `UBLOXApplication` — top-level orchestrator |

@@ -4,22 +4,22 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.3.0] - 2026-08-10
+## [1.3.0] - 2026-09-06
 
 ### Added
-- **GNSS UTC published on both transports** — the gateway now fills the
-  `DATETIME_DELTA` (9) slot that `espnow_protocol.h` already reserved for it, and
-  publishes the same UTC to SignalK as `navigation.datetime`. Both go out at ~2 s
+- **GNSS UTC published on both transports** — the gateway now broadcasts the
+  `DATETIME_DELTA` (9) message type of `espnow_protocol.h` and publishes the same UTC
+  to SignalK as `navigation.datetime`. Both go out at ~2 s
   intervals from a single new `handleDateTime()` handler. The ESP-NOW leg has no WiFi
   guard, so receivers keep a correct clock while the gateway is offline; the SignalK
   leg is skipped unless the WebSocket is connected. This lets displays with neither an
   RTC nor NTP — ESP32-Crowpanel-SkippersWatch's clock page — set their system clock
   straight from GNSS.
 - **UTC epoch read from the module** — `RawGnssData` gains `unix_utc` and `time_valid`.
-  The epoch is read via `getUnixEpoch()` and rounded to the nearest second using the
-  UBX `nano` field, so a receiver's clock lands within ±0.5 s instead of carrying a
-  systematic 0…−1 s lag. Validity is `getConfirmedTime() && getDateValid()`, exactly
-  as the shared protocol header specifies.
+  The epoch is read via `getUnixEpoch()` and rounded to the nearest second from that
+  call's microsecond out-parameter, so a receiver's clock lands within ±0.5 s instead
+  of carrying a systematic 0…−1 s lag. Validity is `getConfirmedTime() &&
+  getDateValid()`, exactly as the shared protocol header specifies.
 - **`UBLOXProcessor::DateTimeDelta`** — UTC is kept in its own struct rather than
   inside `GnssDelta`, because the module can confirm the time before a position fix is
   available and `updateDelta()` NANs `GnssDelta` whenever the fix is lost. Both brokers
@@ -33,8 +33,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   specification does not state the format. The schema's `gnssTimeSource` is a sibling
   of `value` rather than a leaf and so cannot be carried in a delta path; the existing
   `navigation.gnss.type` conveys the same information.
-- `espnow_protocol.h` is **unchanged** — the enum value and `DateTimeDelta` struct were
-  already present and identical in all fleet projects, so no cross-project copy is due.
+- **Shared `espnow_protocol.h` gains the `DATETIME_DELTA` (9) allocation** — the enum
+  value, its row in the fleet-wide `msg_type` table, and the 8-byte `DateTimeDelta`
+  payload struct. The change is purely additive: no existing enum value or payload
+  struct was modified, so the wire format is unchanged and every existing receiver
+  stays compatible. All fleet projects — BME280, CMPS14, DFWind, HALMET, VEDirect,
+  SignalK-ESP-NOW-gateway, ESP32-Crowpanel-compass and ESP32-Crowpanel-SkippersWatch —
+  already carry the byte-identical header, so no further cross-project copy is due.
+- **`getUnixEpoch()` must be called last, and only above year 2020** — it clears the
+  year/month/day/hour/min/sec `moduleQueried` bits, so reading it before the other
+  getters would make each of them re-issue a blocking `getPVT()`. The `year >= 2020`
+  guard is mandatory rather than cosmetic: the library indexes
+  `SFE_UBLOX_DAYS_SINCE_2020[year - 2020]` with no bounds check, so an unfixed module
+  reporting year 0 would read out of bounds and return garbage.
 
 ## [1.2.1] - 2026-07-29
 
@@ -161,6 +172,7 @@ data to both a SignalK server and the ESP-NOW network.
 - **`initWifiServices()` called on every WiFi reconnect** — `ArduinoOTA.begin()` and `SignalKBroker::begin()` were invoked again on each WiFi reconnect, which can destabilise OTA and cause double WebSocket connect attempts; added `_wifi_services_started` guard so they run only once
 - **`navigation.gnss.satellites` and `navigation.gnss.methodQuality` not updating when stationary** — these fields were only transmitted when position/SOG/COG/magvar triggered a send; added `ch_sat` deadband tracking so a change in satellite count or fix type independently triggers transmission
 
+[1.3.0]: https://github.com/mkvesala/UBLOX-ESP32-SignalK-gateway/releases/tag/v1.3.0
 [1.2.1]: https://github.com/mkvesala/UBLOX-ESP32-SignalK-gateway/releases/tag/v1.2.1
 [1.2.0]: https://github.com/mkvesala/UBLOX-ESP32-SignalK-gateway/releases/tag/v1.2.0
 [1.1.0]: https://github.com/mkvesala/UBLOX-ESP32-SignalK-gateway/releases/tag/v1.1.0
