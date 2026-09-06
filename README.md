@@ -22,7 +22,7 @@ Developed and tested on:
 
 Integrated via ESP-NOW with:
 - [ESP32-Crowpanel-compass](https://github.com/mkvesala/ESP32-Crowpanel-compass) (v4.0.0)
-- [ESP32-Crowpanel-SkippersWatch](https://github.com/mkvesala/ESP32-Crowpanel-SkippersWatch) (v1.0.0) — disciplines its system clock from `DATETIME_DELTA`
+- ESP32-Crowpanel-SkippersWatch (v1.0.0) — disciplines its system clock from `DATETIME_DELTA`
 
 ## Purpose of the project
 
