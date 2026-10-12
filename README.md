@@ -9,6 +9,16 @@
 [![Protocol: ESP-NOW](https://img.shields.io/badge/Protocol-ESP--NOW-red)](https://www.espressif.com/en/solutions/low-power-solutions/esp-now)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
+## Disclaimer
+
+This is a personal hobby project. It is provided "as is", without warranty of any kind. See LICENSE.
+
+This firmware is NOT intended for navigation or for any safety-critical use at sea. Do not rely on the data it produces (such as heading, depth or position) to navigate a vessel. Always use certified navigation equipment and proper seamanship.
+
+You use this code entirely at your own risk. The author accepts no liability for any damage, injury or loss arising from its use.
+
+## Introduction
+
 ESP32-based GNSS gateway reading position, speed over ground, and course over ground from a [UBLOX MAX-M10S](https://www.u-blox.com/en/product/max-m10-series) module. Sends navigation data to a [SignalK](https://signalk.org) server via WebSocket/JSON and to other ESP32 devices via ESP-NOW broadcast. Magnetic variation is computed from GPS position and date using the WMM_Tinier geomagnetic model.
 
 OTA firmware updates are enabled. A `/status` debug endpoint is available at `http://<device-ip>/status` when `WEB_UI_ENABLED = true`. NVS persistence and the full web UI configuration interface reserved for future usage.
@@ -36,7 +46,8 @@ This is one of my individual digital boat projects. Use at your own risk. Not fo
 
 | Release | Branch | Comment |
 |---------|--------|---------|
-| v1.3.0 | main | Latest release. GNSS UTC published as ESP-NOW `DATETIME_DELTA` and SignalK `navigation.datetime`. See CHANGELOG for details. |
+| v1.3.1 | main | Latest release. Documentation update only. |
+| v1.3.0 | main | GNSS UTC published as ESP-NOW `DATETIME_DELTA` and SignalK `navigation.datetime`. See CHANGELOG for details. |
 | v1.2.1 | main | Updated the superset version of shared espnow_protocol.h header to this project. |
 | v1.2.0 | main | WebSocket client recreated per reconnect (`std::unique_ptr`) so a stuck lwIP socket is never inherited. See CHANGELOG for details. |
 | v1.1.0 | main | WebSocket ping/pong liveness with graceful reconnect, hardened WiFi reconnect, and static IP (default). See CHANGELOG for details. |
