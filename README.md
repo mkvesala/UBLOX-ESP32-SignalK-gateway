@@ -46,7 +46,8 @@ This is one of my individual digital boat projects. Use at your own risk. Not fo
 
 | Release | Branch | Comment |
 |---------|--------|---------|
-| v1.3.1 | main | Latest release. Documentation update only. |
+| v1.3.2 | main | Latest release. Shared espnow_protocol.h synced with the fleet-wide copy (adds `HALMET_OIL_DELTA` (10)). No firmware logic changes. |
+| v1.3.1 | main | Documentation update only. |
 | v1.3.0 | main | GNSS UTC published as ESP-NOW `DATETIME_DELTA` and SignalK `navigation.datetime`. See CHANGELOG for details. |
 | v1.2.1 | main | Updated the superset version of shared espnow_protocol.h header to this project. |
 | v1.2.0 | main | WebSocket client recreated per reconnect (`std::unique_ptr`) so a stuck lwIP socket is never inherited. See CHANGELOG for details. |

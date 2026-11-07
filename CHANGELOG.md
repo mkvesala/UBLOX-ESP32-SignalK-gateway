@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.2] - 2026-11-07
+
+Shared protocol sync only. **No change to firmware logic.**
+
+### Changed
+- `espnow_protocol.h` synced with the fleet-wide copy: adds the `HALMET_OIL_DELTA` (10)
+  message type and its `HALMETOilDelta` payload struct (engine oil pressure,
+  `propulsion.0.oilPressure` [Pa], sent by HALMET-ESP32-SignalK-gateway). Additive only:
+  no existing enum value or payload struct changed, so the wire format is unchanged and
+  every existing receiver stays compatible. This gateway neither sends nor reads the new type
+
 ## [1.3.1] - 2026-10-12
 
 Documentation patch only. **No change to firmware logic** — only `README.md`, `CHANGELOG.md`
@@ -181,6 +192,7 @@ data to both a SignalK server and the ESP-NOW network.
 - **`initWifiServices()` called on every WiFi reconnect** — `ArduinoOTA.begin()` and `SignalKBroker::begin()` were invoked again on each WiFi reconnect, which can destabilise OTA and cause double WebSocket connect attempts; added `_wifi_services_started` guard so they run only once
 - **`navigation.gnss.satellites` and `navigation.gnss.methodQuality` not updating when stationary** — these fields were only transmitted when position/SOG/COG/magvar triggered a send; added `ch_sat` deadband tracking so a change in satellite count or fix type independently triggers transmission
 
+[1.3.2]: https://github.com/mkvesala/UBLOX-ESP32-SignalK-gateway/releases/tag/v1.3.2
 [1.3.1]: https://github.com/mkvesala/UBLOX-ESP32-SignalK-gateway/releases/tag/v1.3.1
 [1.3.0]: https://github.com/mkvesala/UBLOX-ESP32-SignalK-gateway/releases/tag/v1.3.0
 [1.2.1]: https://github.com/mkvesala/UBLOX-ESP32-SignalK-gateway/releases/tag/v1.2.1
