@@ -46,7 +46,8 @@ This is one of my individual digital boat projects. Use at your own risk. Not fo
 
 | Release | Branch | Comment |
 |---------|--------|---------|
-| v1.3.2 | main | Latest release. Shared espnow_protocol.h synced with the fleet-wide copy (adds `HALMET_OIL_DELTA` (10)). No firmware logic changes. |
+| v1.3.3 | main | Latest release. WiFi outage recovery: the radio stays on, so ESP-NOW keeps broadcasting while the router is down, and WiFi and SignalK reconnect by themselves. See CHANGELOG. |
+| v1.3.2 | main | Shared espnow_protocol.h synced with the fleet-wide copy (adds `HALMET_OIL_DELTA` (10)). No firmware logic changes. |
 | v1.3.1 | main | Documentation update only. |
 | v1.3.0 | main | GNSS UTC published as ESP-NOW `DATETIME_DELTA` and SignalK `navigation.datetime`. See CHANGELOG for details. |
 | v1.2.1 | main | Updated the superset version of shared espnow_protocol.h header to this project. |
@@ -197,7 +198,7 @@ LCD is auto-detected at startup — device boots normally if no display is conne
 
 ### WiFi and OTA
 
-- WiFi state machine: `INIT → CONNECTING → CONNECTED`, with a 3 min connection timeout and automatic fallback to `OFF` on failure or missing SSID
+- WiFi state machine: `INIT → CONNECTING → CONNECTED`. A connection attempt lasts up to ~15 s; if it fails, the gateway waits in `DISCONNECTED` with the radio on (ESP-NOW keeps working on channel 6) and retries every ~30 s–2 min until the network returns. The radio is never switched off
 - Auto-reconnect on dropped connection
 - ArduinoOTA enabled immediately after WiFi connects; hostname is set to the SignalK source name
 - Without WiFi the device still broadcasts via ESP-NOW at full rate
