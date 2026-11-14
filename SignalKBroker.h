@@ -49,10 +49,10 @@ private:
     std::unique_ptr<websockets::WebsocketsClient> _ws;
 
     // Reusable JSON document — position obj + 5 value paths
-    StaticJsonDocument<768> _delta_doc;
+    JsonDocument _delta_doc;
 
     // Separate small document — navigation.datetime is independent of the position delta
-    StaticJsonDocument<384> _dt_doc;
+    JsonDocument _dt_doc;
 
     bool _ws_open = false;
     char _sk_url[512] {};

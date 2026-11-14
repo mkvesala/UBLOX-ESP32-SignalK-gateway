@@ -101,23 +101,23 @@ void SignalKBroker::sendDelta() {
     // --- Build JSON delta ---
     _delta_doc.clear();
     _delta_doc["context"] = "vessels.self";
-    auto updates = _delta_doc.createNestedArray("updates");
-    auto up = updates.createNestedObject();
+    auto updates = _delta_doc["updates"].to<JsonArray>();
+    auto up = updates.add<JsonObject>();
     up["$source"] = _sk_source;
-    auto values = up.createNestedArray("values");
+    auto values = up["values"].to<JsonArray>();
 
     // Helper for simple float paths
     auto add = [&](const char* path, float v) {
-        auto o = values.createNestedObject();
+        auto o = values.add<JsonObject>();
         o["path"] = path;
         o["value"] = v;
     };
 
     // navigation.position — nested object
     if (ch_pos) {
-        auto o = values.createNestedObject();
+        auto o = values.add<JsonObject>();
         o["path"] = "navigation.position";
-        auto pos = o.createNestedObject("value");
+        auto pos = o["value"].to<JsonObject>();
         pos["latitude"] = d.lat_deg;
         pos["longitude"] = d.lon_deg;
         last_lat = d.lat_deg;
@@ -130,12 +130,17 @@ void SignalKBroker::sendDelta() {
     if (ch_var)   { add("navigation.magneticVariation",    d.mag_var_rad); last_var   = d.mag_var_rad; }
 
     // Always include GNSS status fields with every transmission
-    { auto o = values.createNestedObject(); o["path"] = "navigation.gnss.satellites";     o["value"] = (int)d.satellites; }
-    { auto o = values.createNestedObject(); o["path"] = "navigation.gnss.type";           o["value"] = "Combined GPS+GLONASS"; }
-    { auto o = values.createNestedObject(); o["path"] = "navigation.gnss.methodQuality";  o["value"] = methodQualityStr(d.fix_type); }
+    { auto o = values.add<JsonObject>(); o["path"] = "navigation.gnss.satellites";     o["value"] = (int)d.satellites; }
+    { auto o = values.add<JsonObject>(); o["path"] = "navigation.gnss.type";           o["value"] = "Combined GPS+GLONASS"; }
+    { auto o = values.add<JsonObject>(); o["path"] = "navigation.gnss.methodQuality";  o["value"] = methodQualityStr(d.fix_type); }
     last_sat      = d.satellites;
     last_fix_type = d.fix_type;
 
+    if (_delta_doc.overflowed()) {   // heap ran out while building — never send a partial delta
+        last_lat = last_lon = last_sog = last_cog_t = last_var = NAN;   // reopen every deadband so
+        last_sat = last_fix_type = 0xFF;                                  // the next cycle sends in full
+        return;
+    }
     char buf[768];
     size_t n = serializeJson(_delta_doc, buf, sizeof(buf));
     bool ok = _ws->send(buf, n);
@@ -168,14 +173,15 @@ void SignalKBroker::sendDateTime() {
     // --- Build JSON delta ---
     _dt_doc.clear();
     _dt_doc["context"] = "vessels.self";
-    auto updates = _dt_doc.createNestedArray("updates");
-    auto up = updates.createNestedObject();
+    auto updates = _dt_doc["updates"].to<JsonArray>();
+    auto up = updates.add<JsonObject>();
     up["$source"] = _sk_source;
-    auto values = up.createNestedArray("values");
-    auto o = values.createNestedObject();
+    auto values = up["values"].to<JsonArray>();
+    auto o = values.add<JsonObject>();
     o["path"]  = "navigation.datetime";
     o["value"] = iso;
 
+    if (_dt_doc.overflowed()) return;   // heap ran out while building — never send a partial delta
     char buf[256];
     size_t n = serializeJson(_dt_doc, buf, sizeof(buf));
     bool ok = _ws->send(buf, n);

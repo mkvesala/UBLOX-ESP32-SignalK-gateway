@@ -4,6 +4,32 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.4] - 2026-11-14
+
+Patch release: ArduinoJson 7 API migration. The ArduinoJson 6-style calls that ArduinoJson 7
+deprecates are replaced with their ArduinoJson 7 equivalents. SignalK traffic is unchanged.
+
+### Changed
+- `StaticJsonDocument<N>` → `JsonDocument` (`_delta_doc`, `_dt_doc`). In ArduinoJson 7 the
+  capacity `N` was already ignored and the documents already lived on the heap, so memory
+  behaviour is unchanged.
+- `createNestedArray(key)` / `createNestedObject()` / `createNestedObject(key)` →
+  `doc[key].to<JsonArray>()` / `array.add<JsonObject>()` / `obj[key].to<JsonObject>()`. The old
+  calls were inline wrappers for exactly these, so the JSON sent to SignalK is byte-for-byte the
+  same.
+
+### Fixed
+- A delta is no longer sent if the heap ran out while it was being built
+  (`JsonDocument::overflowed()`). Previously a partial delta could reach SignalK. The next cycle
+  sends normally.
+
+### Notes
+- Requires ArduinoJson 7.x (built with 7.4.3); the build no longer shows ArduinoJson deprecation
+  warnings.
+- Verified on the host against a simulated SignalK server: outgoing frames are identical to
+  v1.3.3, no heap growth over 10 000 cycles. Not yet tested on the boat.
+- No change to SignalK paths, subscriptions, the ESP-NOW wire format, NVS settings or the web UI.
+
 ## [1.3.3] - 2026-11-09
 
 Patch release: WiFi outage recovery. ESP-NOW no longer stops when the boat's WiFi router goes
@@ -221,6 +247,7 @@ data to both a SignalK server and the ESP-NOW network.
 - **`initWifiServices()` called on every WiFi reconnect** — `ArduinoOTA.begin()` and `SignalKBroker::begin()` were invoked again on each WiFi reconnect, which can destabilise OTA and cause double WebSocket connect attempts; added `_wifi_services_started` guard so they run only once
 - **`navigation.gnss.satellites` and `navigation.gnss.methodQuality` not updating when stationary** — these fields were only transmitted when position/SOG/COG/magvar triggered a send; added `ch_sat` deadband tracking so a change in satellite count or fix type independently triggers transmission
 
+[1.3.4]: https://github.com/mkvesala/UBLOX-ESP32-SignalK-gateway/releases/tag/v1.3.4
 [1.3.3]: https://github.com/mkvesala/UBLOX-ESP32-SignalK-gateway/releases/tag/v1.3.3
 [1.3.2]: https://github.com/mkvesala/UBLOX-ESP32-SignalK-gateway/releases/tag/v1.3.2
 [1.3.1]: https://github.com/mkvesala/UBLOX-ESP32-SignalK-gateway/releases/tag/v1.3.1
